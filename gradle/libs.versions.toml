@@ -12,7 +12,11 @@ navigationCompose = "2.8.0-beta06"
 koin = "3.5.3"
 zxing = "3.4.1"
 zxing-embedded = "4.3.0"
-firebaseCrashlyticsBuildtools = "3.0.2"
+okhttp = "4.12.0"
+retrofit = "2.9.0"
+converterGson = "2.9.0"
+
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +45,10 @@ koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compos
 zxing-android-embedded = { group = "com.journeyapps", name= "zxing-android-embedded", version.ref = "zxing-embedded"}
 zxing-core = { group = "com.google.zxing", name = "core" , version.ref = "zxing"}
 
+retrofit = {module = "com.squareup.retrofit2:retrofit", version.ref="retrofit"}
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp"}
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -55,4 +63,9 @@ koin = [
 zxing = [
     "zxing-android-embedded",
     "zxing-core"
+]
+retrofit = [
+    "retrofit",
+    "okhttp",
+    "converter-gson"
 ]

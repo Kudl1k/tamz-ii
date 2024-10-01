@@ -74,4 +74,6 @@ dependencies {
     implementation(libs.bundles.koin)
 
     implementation(libs.bundles.zxing)
+
+    implementation(libs.bundles.retrofit)
 }
