@@ -38,6 +38,9 @@ class GraphsScreenViewModel(
                 hourlyParameters = "temperature_2m,relative_humidity_2m,wind_speed_10m"
                 )
                 Log.d("weather", weather.toString())
+                _state.value = _state.value.copy(
+                    weather = weather
+                )
             } catch (e: HttpException) {
                 Log.d("weather", "error:${e.message()}")
                 _state.value = _state.value.copy(
