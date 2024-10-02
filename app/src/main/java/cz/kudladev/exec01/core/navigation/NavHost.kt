@@ -9,7 +9,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreen
+import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.graphs.GraphsScreen
+import cz.kudladev.exec01.core.presentation.screens.graphs.GraphsScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.inputs_screen.InputScreenViewmodel
 import cz.kudladev.exec01.core.presentation.screens.inputs_screen.InputsScreen
 import org.koin.androidx.compose.koinViewModel
@@ -36,10 +38,16 @@ fun NavigationHost(
                 ScannerScreen(navController = navHostController)
             }
             composable(route = Routes.API.route){
-                APIScreen(navController = navHostController)
+                val viewModel: APIScreenViewModel = koinViewModel()
+                val state by viewModel.state.collectAsState()
+                val onEvent = viewModel::onEvent
+                APIScreen(navController = navHostController, state = state, onEvent = onEvent)
             }
             composable(route = Routes.Graphs.route){
-                GraphsScreen(navController = navHostController)
+                val viewModel: GraphsScreenViewModel = koinViewModel()
+                val state by viewModel.state.collectAsState()
+                val onEvent = viewModel::onEvent
+                GraphsScreen(navController = navHostController, state = state, onEvent = onEvent)
             }
         }
 

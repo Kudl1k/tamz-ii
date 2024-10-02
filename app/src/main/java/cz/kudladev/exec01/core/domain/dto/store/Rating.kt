@@ -1,4 +1,4 @@
-package cz.kudladev.exec01.core.domain.dto
+package cz.kudladev.exec01.core.domain.dto.store
 
 data class Rating(
     val count: Int,
