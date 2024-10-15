@@ -1,4 +1,4 @@
-package cz.kudladev.exec01.core.presentation.screens.inputs_screen
+package cz.kudladev.exec01.core.presentation.screens.investment_calculator
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

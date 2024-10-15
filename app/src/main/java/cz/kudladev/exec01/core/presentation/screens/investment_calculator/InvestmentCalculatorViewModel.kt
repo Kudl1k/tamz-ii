@@ -1,4 +1,4 @@
-package cz.kudladev.exec01.core.presentation.screens.inputs_screen
+package cz.kudladev.exec01.core.presentation.screens.investment_calculator
 
 import android.util.Log
 import androidx.datastore.core.DataStore
@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.math.pow
 
-class InputScreenViewmodel(
+class InvestmentCalculatorViewModel(
     private val dataStore: DataStore<Preferences>
 ): ViewModel() {
 
-    private val _state = MutableStateFlow(InputScreenState())
+    private val _state = MutableStateFlow(InvestmentCalcState())
     val state = _state.asStateFlow()
 
     init {
@@ -32,31 +32,65 @@ class InputScreenViewmodel(
     }
 
 
-    fun onEvent(event: InputScreenEvents) {
+    fun onEvent(event: InvestmentCalcEvents) {
         when (event) {
-            is InputScreenEvents.setBalance -> {
+            is InvestmentCalcEvents.setBalance -> {
                 _state.value = _state.value.copy(
                     startbalance = event.balance
                 )
-                calculateResult()
+                if (_state.value.repeatableInvestment){
+                    calculateRepeatableInvestment()
+                } else {
+                    calculateResult()
+                }
             }
-            is InputScreenEvents.setInterest -> {
+            is InvestmentCalcEvents.setInterest -> {
                 _state.value = _state.value.copy(
                     interest = event.interest
                 )
-                calculateResult()
+                if (_state.value.repeatableInvestment){
+                    calculateRepeatableInvestment()
+                } else {
+                    calculateResult()
+                }
             }
-            is InputScreenEvents.setLength -> {
+            is InvestmentCalcEvents.setLength -> {
                 _state.value = _state.value.copy(
                     length = event.length
                 )
-                calculateResult()
+                if (_state.value.repeatableInvestment){
+                    calculateRepeatableInvestment()
+                } else {
+                    calculateResult()
+                }
             }
-            InputScreenEvents.ToggleChartType -> {
+            InvestmentCalcEvents.ToggleChartType -> {
                 _state.value = _state.value.copy(
                     barChartToggle = !_state.value.barChartToggle,
                     pieChartToggle = !_state.value.pieChartToggle
                 )
+            }
+
+            InvestmentCalcEvents.ToggleRepeatableInvestment -> {
+                _state.value = _state.value.copy(
+                    repeatableInvestment = !_state.value.repeatableInvestment
+                )
+                if (_state.value.repeatableInvestment){
+                    calculateRepeatableInvestment()
+                } else {
+                    calculateResult()
+                }
+            }
+
+            is InvestmentCalcEvents.setRepetableInvestmentAmount -> {
+                _state.value = _state.value.copy(
+                    repeatableInvestmentAmount = event.amount
+                )
+                if (_state.value.repeatableInvestment) {
+                    calculateRepeatableInvestment()
+                } else {
+                    calculateResult()
+                }
             }
         }
     }
@@ -84,6 +118,31 @@ class InputScreenViewmodel(
 
     }
 
+    private fun calculateRepeatableInvestment() {
+        val balance = state.value.startbalance
+        val interest = state.value.interest
+        val length = state.value.length
+        val repeatableInvestmentAmount = state.value.repeatableInvestmentAmount
+
+        // Ensure interest rate is in decimal form (e.g., 0.05 for 5%)
+        val decimalInterestRate = interest / 100.0
+
+        // Calculate the final capital using the compound interest formula
+        var finalCapital = balance
+        for (i in 1..length) {
+            finalCapital = (finalCapital + repeatableInvestmentAmount) * (1 + decimalInterestRate)
+        }
+
+        // Calculate the total interest earned
+        val interestEarned = finalCapital - balance - (repeatableInvestmentAmount * length)
+
+        _state.value = _state.value.copy(
+            resultedMoney = finalCapital,
+            resultedInterestMoney = interestEarned
+        )
+        saveInputScreenState(_state.value)
+    }
+
     fun loadState() {
         viewModelScope.launch {
             loadInputScreenState()
@@ -95,12 +154,16 @@ class InputScreenViewmodel(
         Log.d("InputScreenViewModel", "Loading input screen state")
         try {
             val data = dataStore.data.map { preferences ->
-                InputScreenState(
+                InvestmentCalcState(
                     resultedMoney = preferences[ResultedMoneyKey] ?: 0.0,
                     resultedInterestMoney = preferences[ResultedInterestMoneyKey] ?: 0.0,
                     startbalance = preferences[StartBalanceKey] ?: 1000.0,
                     interest = preferences[InterestKey] ?: 2.0,
-                    length = preferences[LengthKey] ?: 4
+                    length = preferences[LengthKey] ?: 4,
+                    pieChartToggle = preferences[PieChartToggleKey] ?: false,
+                    barChartToggle = preferences[BarChartToggleKey] ?: true,
+                    repeatableInvestment = preferences[RepeatableInvestmentKey] ?: false,
+                    repeatableInvestmentAmount = preferences[RepeatableInvestmentAmountKey] ?: 0.0
                 )
             }.first()
             _state.value = data
@@ -110,7 +173,7 @@ class InputScreenViewmodel(
         }
     }
 
-    fun saveInputScreenState(state: InputScreenState) {
+    fun saveInputScreenState(state: InvestmentCalcState) {
         Log.d("InputScreenViewModel", "Saving input screen state: $state")
         viewModelScope.launch {
             dataStore.edit { preferences ->
@@ -119,6 +182,11 @@ class InputScreenViewmodel(
                 preferences[StartBalanceKey] = state.startbalance
                 preferences[InterestKey] = state.interest
                 preferences[LengthKey] = state.length
+                preferences[PieChartToggleKey] = state.pieChartToggle
+                preferences[BarChartToggleKey] = state.barChartToggle
+                preferences[RepeatableInvestmentKey] = state.repeatableInvestment
+                preferences[RepeatableInvestmentAmountKey] = state.repeatableInvestmentAmount
+                Log.d("InputScreenViewModel", "Saved input screen state: $state")
             }
         }
     }

@@ -1,7 +1,6 @@
 package cz.kudladev.exec01.core.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
@@ -13,8 +12,8 @@ import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.graphs.GraphsScreen
 import cz.kudladev.exec01.core.presentation.screens.graphs.GraphsScreenViewModel
-import cz.kudladev.exec01.core.presentation.screens.inputs_screen.InputScreenViewmodel
-import cz.kudladev.exec01.core.presentation.screens.inputs_screen.InputsScreen
+import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
+import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculator
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -26,15 +25,15 @@ fun NavigationHost(
         startDestination = Routes.Root.route
     ) {
         navigation(
-            startDestination = Routes.Inputs.route,
+            startDestination = Routes.InvestmentCalc.route,
             route = Routes.Root.route
         ){
-            composable(route = Routes.Inputs.route){
-                val viewModel: InputScreenViewmodel = koinViewModel()
+            composable(route = Routes.InvestmentCalc.route){
+                val viewModel: InvestmentCalculatorViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
                 val onEvent = viewModel::onEvent
 
-                InputsScreen(navController = navHostController, state = state, onEvent = onEvent )
+                InvestmentCalculator(navController = navHostController, state = state, onEvent = onEvent )
             }
             composable(route = Routes.Scanner.route){
                 ScannerScreen(navController = navHostController)

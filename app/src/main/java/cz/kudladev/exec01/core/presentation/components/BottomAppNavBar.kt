@@ -1,8 +1,5 @@
 package cz.kudladev.exec01.core.presentation.components
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -18,9 +15,9 @@ fun BottomAppNavBar(modifier: Modifier = Modifier, navController: NavController)
         modifier = modifier
     ) {
         NavigationBarItem(
-            selected = navController.currentDestination?.route == Routes.Inputs.route,
+            selected = navController.currentDestination?.route == Routes.InvestmentCalc.route,
             onClick = {
-                navController.navigate(Routes.Inputs.route){
+                navController.navigate(Routes.InvestmentCalc.route){
                     popUpTo(Routes.Root.route){
                         inclusive = true
                     }
@@ -28,12 +25,12 @@ fun BottomAppNavBar(modifier: Modifier = Modifier, navController: NavController)
             },
             icon = {
                 Icon(
-                    imageVector = Routes.Inputs.icon!!,
-                    contentDescription = Routes.Inputs.title
+                    imageVector = Routes.InvestmentCalc.icon!!,
+                    contentDescription = Routes.InvestmentCalc.title
                 )
             },
             label = {
-                Routes.Inputs.title?.let {
+                Routes.InvestmentCalc.title?.let {
                     Text(
                         text = it
                     )

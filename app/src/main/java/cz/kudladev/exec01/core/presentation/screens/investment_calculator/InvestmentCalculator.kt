@@ -1,6 +1,5 @@
-package cz.kudladev.exec01.core.presentation.screens.inputs_screen
+package cz.kudladev.exec01.core.presentation.screens.investment_calculator
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,30 +10,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,25 +41,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import cz.kudladev.exec01.core.presentation.components.BottomAppNavBar
+import cz.kudladev.exec01.core.navigation.Routes
 import cz.kudladev.exec01.core.presentation.components.NavDrawer
 import cz.kudladev.exec01.core.presentation.components.TopAppBarWithDrawer
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 @Composable
-fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, state: InputScreenState, onEvent: (InputScreenEvents) -> Unit) {
-
+fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavController, state: InvestmentCalcState, onEvent: (InvestmentCalcEvents) -> Unit) {
+    val route = Routes.InvestmentCalc
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    var enableDropDownMenu by remember {
+        mutableStateOf(false)
+    }
+    val scrollState = rememberScrollState()
 
     val context = LocalContext.current
 
@@ -71,13 +69,40 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
         Scaffold(
             topBar = {
                 TopAppBarWithDrawer(
-                    title = "Inputs",
+                    title = route.title!!,
                     icon = Icons.Default.Menu,
                     onIconClick = {
                         scope.launch {
                             drawerState.apply {
                                 if (isClosed) open() else close()
                             }
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                enableDropDownMenu = !enableDropDownMenu
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = null
+                            )
+                        }
+                        DropdownMenu(expanded = enableDropDownMenu, onDismissRequest = { enableDropDownMenu = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Pravidelný vklad") },
+                                onClick = {
+                                    onEvent(InvestmentCalcEvents.ToggleRepeatableInvestment)
+                                },
+                                leadingIcon = {
+                                    if (!state.repeatableInvestment){
+                                        Icon(Icons.Outlined.Circle, contentDescription = null)
+                                    } else {
+                                        Icon(Icons.Filled.CheckCircle, contentDescription = null)
+                                    }
+                                }
+                            )
                         }
                     }
                 )
@@ -87,7 +112,8 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
-                    .padding(top = 16.dp),
+                    .padding(top = 16.dp)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ElevatedCard(
@@ -107,9 +133,9 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                                 fontSize = MaterialTheme.typography.titleLarge.fontSize
                             )
                             Text(
-                                text = "${String.format("%.2f", state.resultedMoney)} Kč",
+                                text = "${state.resultedMoney.format()} Kč",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize
                             )
                         }
                         Row(
@@ -123,9 +149,9 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                                 fontSize = MaterialTheme.typography.titleLarge.fontSize
                             )
                             Text(
-                                text = "${String.format("%.2f", state.resultedInterestMoney)} Kč",
+                                text = "${state.resultedInterestMoney.format()} Kč",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize
                             )
                         }
                     }
@@ -140,7 +166,7 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                     ) {
                         FilterChip(
                             onClick = {
-                                onEvent(InputScreenEvents.ToggleChartType)
+                                onEvent(InvestmentCalcEvents.ToggleChartType)
                             },
                             label = {
                                 Text("Bar")
@@ -150,7 +176,7 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                         Spacer(modifier.padding(horizontal = 8.dp))
                         FilterChip(
                             onClick = {
-                                onEvent(InputScreenEvents.ToggleChartType)
+                                onEvent(InvestmentCalcEvents.ToggleChartType)
                             },
                             label = {
                                 Text("Pie")
@@ -206,24 +232,37 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ){
+                        if (state.repeatableInvestment){
+                            Text(
+                                text = "Pravidelný vklad: ${state.repeatableInvestmentAmount.format()} Kč"
+                            )
+                            Slider(
+                                value = state.repeatableInvestmentAmount.toFloat(),
+                                onValueChange = {
+                                    onEvent(InvestmentCalcEvents.setRepetableInvestmentAmount(it.toDouble()))
+                                },
+                                valueRange = 0f..100000f,
+                            )
+                        }
+
                         Text(
-                            text = "Počátný stav: ${String.format("%.2f", state.startbalance)} Kč"
+                            text = "Počátný stav: ${state.startbalance.format()} Kč"
                         )
                         Slider(
                             value = state.startbalance.toFloat(),
                             onValueChange = {
-                                onEvent(InputScreenEvents.setBalance(it.toDouble()))
+                                onEvent(InvestmentCalcEvents.setBalance(it.toDouble()))
                             },
-                            valueRange = 0f..10000f,
+                            valueRange = 0f..1000000f,
                         )
 
                         Text(
-                            text = "Počáteční úrok: ${String.format("%.2f", state.interest)} %"
+                            text = "Počáteční úrok: ${state.interest.format()} %"
                         )
                         Slider(
                             value = state.interest.toFloat(),
                             onValueChange = {
-                                onEvent(InputScreenEvents.setInterest(it.toDouble()))
+                                onEvent(InvestmentCalcEvents.setInterest(it.toDouble()))
                             },
                             valueRange = 0f..10f
                         )
@@ -233,15 +272,22 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                         Slider(
                             value = state.length.toFloat(),
                             onValueChange = {
-                                onEvent(InputScreenEvents.setLength(it.toInt()))
+                                onEvent(InvestmentCalcEvents.setLength(it.toInt()))
                             },
                             valueRange = 0f..48f
                         )
                     }
                 }
-
             }
         }
 
     }
+}
+
+fun Double.format(): String {
+    val symbols = DecimalFormatSymbols(Locale.getDefault()).apply {
+        groupingSeparator = ' ' // Set space as the grouping separator
+        decimalSeparator = ',' // Set comma as the decimal separator
+    }
+    return DecimalFormat("#,##0.00", symbols).format(this)
 }

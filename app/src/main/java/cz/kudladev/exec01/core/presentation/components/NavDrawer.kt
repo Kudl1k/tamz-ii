@@ -7,7 +7,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,7 +22,7 @@ fun NavDrawer(
     screenContent: @Composable () -> Unit
 ) {
     val routes = listOf(
-        Routes.Inputs,
+        Routes.InvestmentCalc,
         Routes.Graphs,
         Routes.API,
         Routes.Scanner,

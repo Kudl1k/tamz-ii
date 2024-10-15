@@ -8,7 +8,7 @@ import cz.kudladev.exec01.core.data.api.StoreApi
 import cz.kudladev.exec01.core.data.api.WeatherApi
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.graphs.GraphsScreenViewModel
-import cz.kudladev.exec01.core.presentation.screens.inputs_screen.InputScreenViewmodel
+import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -47,7 +47,7 @@ val coreModule = module {
     }
 
     viewModel {
-        InputScreenViewmodel(
+        InvestmentCalculatorViewModel(
             get<DataStore<Preferences>>()
         )
     }

@@ -17,6 +17,7 @@ fun TopAppBarWithDrawer(
     modifier: Modifier = Modifier,
     title: String,
     icon: ImageVector,
+    actions: @Composable () -> Unit = {},
     onIconClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
@@ -34,6 +35,9 @@ fun TopAppBarWithDrawer(
                     contentDescription = null
                 )
             }
+        },
+        actions = {
+            actions()
         }
     )
 }
