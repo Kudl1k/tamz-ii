@@ -112,7 +112,6 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
-                    .padding(top = 16.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -128,9 +127,9 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Naspořená suma:",
+                                text = "Naspořená suma",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize
                             )
                             Text(
                                 text = "${state.resultedMoney.format()} Kč",
@@ -144,9 +143,9 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Z toho úrok:",
+                                text = "Z toho úrok",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize
                             )
                             Text(
                                 text = "${state.resultedInterestMoney.format()} Kč",
@@ -233,9 +232,18 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                         modifier = Modifier.padding(16.dp)
                     ){
                         if (state.repeatableInvestment){
-                            Text(
-                                text = "Pravidelný vklad: ${state.repeatableInvestmentAmount.format()} Kč"
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Pravidelný vklad",
+                                )
+                                Text(
+                                    text = "${state.repeatableInvestmentAmount.format()} Kč"
+                                )
+                            }
                             Slider(
                                 value = state.repeatableInvestmentAmount.toFloat(),
                                 onValueChange = {
@@ -245,9 +253,18 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                             )
                         }
 
-                        Text(
-                            text = "Počátný stav: ${state.startbalance.format()} Kč"
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Počátný stav"
+                            )
+                            Text(
+                                text = "${state.startbalance.format()} Kč"
+                            )
+                        }
                         Slider(
                             value = state.startbalance.toFloat(),
                             onValueChange = {
@@ -256,9 +273,18 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                             valueRange = 0f..1000000f,
                         )
 
-                        Text(
-                            text = "Počáteční úrok: ${state.interest.format()} %"
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Počáteční úrok"
+                            )
+                            Text(
+                                text = "${state.interest.format()} %"
+                            )
+                        }
                         Slider(
                             value = state.interest.toFloat(),
                             onValueChange = {
@@ -266,9 +292,19 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                             },
                             valueRange = 0f..10f
                         )
-                        Text(
-                            text = "Délka: ${state.length}"
-                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Délka"
+                            )
+                            Text(
+                                text = "${state.length} roků"
+                            )
+                        }
                         Slider(
                             value = state.length.toFloat(),
                             onValueChange = {
