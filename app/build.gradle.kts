@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "cz.kudladev.exec01"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "cz.kudladev.exec01"
@@ -80,5 +80,9 @@ dependencies {
     implementation(libs.bundles.retrofit)
 
     implementation(libs.bundles.coil)
+
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
 }

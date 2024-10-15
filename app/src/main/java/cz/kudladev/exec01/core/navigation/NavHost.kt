@@ -1,6 +1,7 @@
 package cz.kudladev.exec01.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
@@ -32,6 +33,7 @@ fun NavigationHost(
                 val viewModel: InputScreenViewmodel = koinViewModel()
                 val state by viewModel.state.collectAsState()
                 val onEvent = viewModel::onEvent
+
                 InputsScreen(navController = navHostController, state = state, onEvent = onEvent )
             }
             composable(route = Routes.Scanner.route){

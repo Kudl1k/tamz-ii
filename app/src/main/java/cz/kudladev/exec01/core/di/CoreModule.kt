@@ -1,6 +1,9 @@
 package cz.kudladev.exec01.core.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import cz.kudladev.exec01.core.data.api.StoreApi
 import cz.kudladev.exec01.core.data.api.WeatherApi
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
@@ -11,6 +14,8 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "input_screen_preferences")
 
 val coreModule = module {
 
@@ -37,8 +42,14 @@ val coreModule = module {
             .create(WeatherApi::class.java)
     }
 
+    single<DataStore<Preferences>> {
+        androidContext().dataStore
+    }
+
     viewModel {
-        InputScreenViewmodel()
+        InputScreenViewmodel(
+            get<DataStore<Preferences>>()
+        )
     }
     viewModel {
         APIScreenViewModel(get())
