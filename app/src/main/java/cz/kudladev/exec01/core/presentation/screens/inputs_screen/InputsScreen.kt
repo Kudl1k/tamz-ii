@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import cz.kudladev.exec01.core.presentation.components.BottomAppNavBar
@@ -95,16 +96,38 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Text(
-                            text = "Naspořená suma: ${String.format("%.2f", state.resultedMoney)} Kč",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = MaterialTheme.typography.titleLarge.fontSize
-                        )
-                        Text(
-                            text = "Z toho úrok: ${String.format("%.2f", state.resultedInterestMoney)} Kč",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = MaterialTheme.typography.titleLarge.fontSize
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Naspořená suma:",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                            )
+                            Text(
+                                text = "${String.format("%.2f", state.resultedMoney)} Kč",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Z toho úrok:",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                            )
+                            Text(
+                                text = "${String.format("%.2f", state.resultedInterestMoney)} Kč",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                            )
+                        }
                     }
                 }
                 ElevatedCard(
@@ -141,10 +164,11 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                         CompoundInterestPieChart(state.resultedMoney,state.resultedInterestMoney)
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp)
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
-                            modifier = Modifier.weight(1f),
                             verticalAlignment = Alignment.CenterVertically
                         ){
                             Box(
@@ -154,12 +178,12 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                                     .background(MaterialTheme.colorScheme.primary)
                             )
                             Text(
-                                text = "Final Capital",
-                                modifier = Modifier.padding(start = 8.dp)
+                                text = "Naspořená suma",
+                                modifier = Modifier.padding(start = 8.dp),
+                                fontSize = 12.sp
                             )
                         }
                         Row(
-                            modifier = Modifier.weight(1f),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
@@ -169,8 +193,9 @@ fun InputsScreen(modifier: Modifier = Modifier, navController: NavController, st
                                     .background(MaterialTheme.colorScheme.secondary),
                             )
                             Text(
-                                text = "Interest Earned",
-                                modifier = Modifier.padding(start = 8.dp)
+                                text = "Z toho úrok",
+                                modifier = Modifier.padding(start = 8.dp),
+                                fontSize = 12.sp
                             )
                         }
                     }

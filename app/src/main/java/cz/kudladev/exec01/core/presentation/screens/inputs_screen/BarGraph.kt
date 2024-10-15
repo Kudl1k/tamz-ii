@@ -38,6 +38,7 @@ fun CompoundInterestBarChart(finalCapital: Double, interestEarned: Double) {
     val chart = remember { BarChart(context) } // Remember the chart instance
     val color1 = MaterialTheme.colorScheme.primary.toArgb();
     val color2 = MaterialTheme.colorScheme.secondary.toArgb();
+    val textColor = MaterialTheme.colorScheme.onSurface.toArgb()
 
     // Update chart data when finalCapital or interestEarned change
     LaunchedEffect(finalCapital, interestEarned) {
@@ -55,6 +56,9 @@ fun CompoundInterestBarChart(finalCapital: Double, interestEarned: Double) {
         val barData = BarData(dataSet1, dataSet2) // Add both data sets
         chart.data = barData
 
+
+        dataSet1.valueTextColor = textColor
+        dataSet2.valueTextColor = textColor
 
         // Remove description label
         chart.description.isEnabled = false

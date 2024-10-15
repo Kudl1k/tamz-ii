@@ -87,6 +87,7 @@ class InputScreenViewmodel(
     fun loadState() {
         viewModelScope.launch {
             loadInputScreenState()
+            saveInputScreenState(_state.value)
         }
     }
 
