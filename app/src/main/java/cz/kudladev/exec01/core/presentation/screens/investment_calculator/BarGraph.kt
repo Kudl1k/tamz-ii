@@ -59,7 +59,7 @@ fun CompoundInterestBarChart(finalCapital: Double, interestEarned: Double) {
         chart.axisLeft.isEnabled = false
         chart.axisRight.isEnabled = false
 
-
+        chart.setTouchEnabled(false)
 
         chart.axisLeft.axisMinimum = 0f
         chart.axisRight.axisMinimum = 0f

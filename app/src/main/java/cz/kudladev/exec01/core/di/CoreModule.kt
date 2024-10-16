@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import cz.kudladev.exec01.core.data.api.GeoApi
 import cz.kudladev.exec01.core.data.api.StoreApi
 import cz.kudladev.exec01.core.data.api.WeatherApi
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
@@ -42,6 +43,14 @@ val coreModule = module {
             .create(WeatherApi::class.java)
     }
 
+    single {
+        Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(GeoApi.BASE_URL)
+            .build()
+            .create(GeoApi::class.java)
+    }
+
     single<DataStore<Preferences>> {
         androidContext().dataStore
     }
@@ -56,7 +65,10 @@ val coreModule = module {
     }
 
     viewModel{
-        WeatherScreenViewModel(get()){
+        WeatherScreenViewModel(
+            weatherApi = get(),
+            geoApi = get()
+        ){
             androidContext()
         }
     }

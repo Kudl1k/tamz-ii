@@ -87,4 +87,7 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-tasks:18.0.2")
 
+    implementation("androidx.compose.animation:animation-core:1.7.3")
+    implementation("androidx.compose.animation:animation-graphics:1.7.3")
+
 }

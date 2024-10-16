@@ -53,6 +53,9 @@ fun CompoundInterestPieChart(finalCapital: Double, interestEarned: Double) {
         chart.description.isEnabled = false
         chart.legend.isEnabled = false // Enable legend
         chart.setUsePercentValues(true) // Display values as percentage
+        chart.isClickable = false
+
+        chart.setTouchEnabled(false)
 
         chart.invalidate() // Refresh chart
     }

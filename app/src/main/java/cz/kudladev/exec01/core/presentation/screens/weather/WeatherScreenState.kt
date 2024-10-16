@@ -1,5 +1,6 @@
 package cz.kudladev.exec01.core.presentation.screens.weather
 
+import cz.kudladev.exec01.core.domain.dto.location.GeocodeReverseResponse
 import cz.kudladev.exec01.core.domain.dto.weather.Weather
 
 data class WeatherScreenState(
@@ -8,5 +9,8 @@ data class WeatherScreenState(
     val error: String? = null,
     val longitude: Double? = null,
     val latitude: Double? = null,
-    val weather: Weather? = null
+    val weather: Weather? = null,
+    val place: GeocodeReverseResponse? = null,
+    val searchQuery: String = "",
+    val showSearchBox: Boolean = false
 )

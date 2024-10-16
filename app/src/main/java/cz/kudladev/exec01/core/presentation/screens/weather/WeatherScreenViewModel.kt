@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
+import cz.kudladev.exec01.core.data.api.GeoApi
 import cz.kudladev.exec01.core.data.api.WeatherApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +15,7 @@ import retrofit2.HttpException
 
 class WeatherScreenViewModel(
     weatherApi: WeatherApi,
+    geoApi: GeoApi,
     private val context: () -> Context
 ): ViewModel() {
 
@@ -21,7 +23,7 @@ class WeatherScreenViewModel(
     val state = _state.asStateFlow()
 
     init {
-        fetchLastLocation(weatherApi)
+        fetchLastLocation(weatherApi,geoApi)
     }
 
     private fun fetchWeatherForecast(weatherApi: WeatherApi) {
@@ -46,7 +48,7 @@ class WeatherScreenViewModel(
         }
     }
 
-    private fun fetchLastLocation(weatherApi: WeatherApi) {
+    private fun fetchLastLocation(weatherApi: WeatherApi,geoApi: GeoApi) {
         try {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context.invoke())
             val location = fusedLocationClient.lastLocation
@@ -60,6 +62,7 @@ class WeatherScreenViewModel(
                         )
                         Log.d("location", "latitude: ${location.latitude}, longitude: ${location.longitude}")
                         fetchWeatherForecast(weatherApi)
+                        fetchLocationInfo(geoApi)
                     } else {
                         Log.d("location", "error")
                         _state.value = _state.value.copy(
@@ -76,6 +79,30 @@ class WeatherScreenViewModel(
     }
 
 
+    private fun fetchLocationInfo(geoApi: GeoApi){
+        viewModelScope.launch{
+            try {
+                if (_state.value.latitude == null || _state.value.longitude == null) throw Exception("Location is null");
+                val locationInfo = geoApi.reverseGeocode(
+                    longitude = _state.value.longitude!!,
+                    latitude = _state.value.latitude!!
+                )
+                Log.d("location", locationInfo.toString())
+            } catch (e: HttpException){
+                Log.d("location", "error:${e.message()}")
+                _state.value = _state.value.copy(
+                    error = "${e.code()}: ${e.message()}"
+                )
+            } catch (e: Exception){
+                Log.d("location", "error:${e.message}")
+                _state.value = _state.value.copy(
+                    error = e.message
+                )
+            }
+        }
+    }
+
+
 
     fun onEvent(event: WeatherScreenEvents){
         when (event) {
@@ -83,6 +110,21 @@ class WeatherScreenViewModel(
                 _state.value = _state.value.copy(
                     permissionsGranted = !_state.value.permissionsGranted
                 )
+            }
+
+            is WeatherScreenEvents.setSearchQuery -> {
+                _state.value = _state.value.copy(
+                    searchQuery = event.query
+                )
+            }
+            WeatherScreenEvents.ToggleSearchBox -> {
+                _state.value = _state.value.copy(
+                    showSearchBox = !_state.value.showSearchBox
+                )
+            }
+
+            WeatherScreenEvents.Search -> {
+
             }
         }
     }
