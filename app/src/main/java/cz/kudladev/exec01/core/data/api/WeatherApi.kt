@@ -10,9 +10,10 @@ interface WeatherApi {
     suspend fun getWeatherForecast(
         @Query("latitude") latitude: String,
         @Query("longitude") longitude: String,
-        @Query("current") currentParameters: String,
-        @Query("hourly") hourlyParameters: String,
-        @Query("timezone") timezone: String = "auto",
+        @Query("current") currentParameters: String = "is_day", // Default value for current
+        @Query("hourly") hourlyParameters: String = "temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m", // Default value for hourly
+        @Query("daily") dailyParameters: String = "uv_index_max", // Added daily parameter
+        @Query("timezone") timezone: String = "auto"
     ): Weather
 
 

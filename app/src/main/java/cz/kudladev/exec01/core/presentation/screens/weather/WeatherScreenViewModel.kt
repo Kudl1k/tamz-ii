@@ -15,15 +15,21 @@ import retrofit2.HttpException
 
 class WeatherScreenViewModel(
     weatherApi: WeatherApi,
-    geoApi: GeoApi,
+    private val geoApi: GeoApi,
     private val context: () -> Context
 ): ViewModel() {
 
     private val _state = MutableStateFlow(WeatherScreenState())
     val state = _state.asStateFlow()
 
+
+
     init {
         fetchLastLocation(weatherApi,geoApi)
+        _state.value = _state.value.copy(
+            searchQuery = "Horni Bludovice"
+        )
+        searchLocation(geoApi)
     }
 
     private fun fetchWeatherForecast(weatherApi: WeatherApi) {
@@ -32,8 +38,6 @@ class WeatherScreenViewModel(
                 val weather = weatherApi.getWeatherForecast(
                     latitude = String.format("%.2f", _state.value.latitude),
                     longitude = String.format("%.2f", _state.value.longitude),
-                    currentParameters = "temperature_2m,wind_speed_10m,weather_code",
-                    hourlyParameters = "temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code",
                 )
                 Log.d("weather", weather.toString())
                 _state.value = _state.value.copy(
@@ -87,6 +91,9 @@ class WeatherScreenViewModel(
                     longitude = _state.value.longitude!!,
                     latitude = _state.value.latitude!!
                 )
+                _state.value = _state.value.copy(
+                    place = locationInfo
+                )
                 Log.d("location", locationInfo.toString())
             } catch (e: HttpException){
                 Log.d("location", "error:${e.message()}")
@@ -102,6 +109,26 @@ class WeatherScreenViewModel(
         }
     }
 
+    private fun searchLocation(geoApi: GeoApi){
+        viewModelScope.launch{
+            try {
+                val result = geoApi.searchSuggestions(
+                    query = _state.value.searchQuery
+                )
+                Log.d("location", result.toString())
+            } catch (e: HttpException){
+                Log.d("location", "error:${e.message()}")
+                _state.value = _state.value.copy(
+                    error = "${e.code()}: ${e.message()}"
+                )
+            } catch (e : Exception){
+                Log.d("location", "error:${e.message}")
+                _state.value = _state.value.copy(
+                    error = e.message
+                )
+            }
+        }
+    }
 
 
     fun onEvent(event: WeatherScreenEvents){
@@ -124,7 +151,7 @@ class WeatherScreenViewModel(
             }
 
             WeatherScreenEvents.Search -> {
-
+                searchLocation(geoApi = geoApi)
             }
         }
     }

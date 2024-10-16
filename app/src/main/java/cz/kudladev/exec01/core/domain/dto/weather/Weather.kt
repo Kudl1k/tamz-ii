@@ -3,6 +3,8 @@ package cz.kudladev.exec01.core.domain.dto.weather
 data class Weather(
     val current: Current,
     val current_units: CurrentUnits,
+    val daily: Daily,
+    val daily_units: DailyUnits,
     val elevation: Int,
     val generationtime_ms: Double,
     val hourly: Hourly,

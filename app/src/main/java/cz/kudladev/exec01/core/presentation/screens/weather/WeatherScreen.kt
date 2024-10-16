@@ -6,35 +6,35 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOff
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,9 +43,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -143,10 +145,8 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-
+                    .padding(it),
+                horizontalAlignment = Alignment.Start,
             ) {
                 Box(
                     modifier = Modifier
@@ -164,11 +164,12 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                 onEvent(WeatherScreenEvents.setSearchQuery(query))
                             },
                             onSearch = {
-                                if (state.searchQuery.isNotBlank()) {
-                                    onEvent(WeatherScreenEvents.Search)
-                                } else {
+                                if (!state.searchQuery.isNotBlank()) {
                                     onEvent(WeatherScreenEvents.ToggleSearchBox)
                                 }
+                            },
+                            onSearchTriggered = {
+                                onEvent(WeatherScreenEvents.Search)
                             },
                             focus = focus,
                             shouldShowHint = true
@@ -178,78 +179,219 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
 
                 if (!state.error.isNullOrBlank()){
                     Text(text = state.error)
-                } else {
-                    ElevatedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ){
+                } else if (state.place != null){
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    ) {
                         Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = state.place.features[0].properties.context.place.name,
+                                fontSize = MaterialTheme.typography.titleLarge.fontSize
+                            )
+                            Text(
+                                text = "${state.place.features[0].properties.context.region.name}, ${state.place.features[0].properties.context.country.name}",
+                                fontSize = MaterialTheme.typography.labelSmall.fontSize
+                            )
+                        }
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = Alignment.End
+                        ) {
+                            val time = state.weather?.current?.time?.split("T")
+                            Text(
+                                text = "${time?.get(0)} ${time?.get(1)}",
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                    ) {
+                        Box(
+                           modifier = Modifier.weight(1f)
+                        ){
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ){
+                                Image(
+                                    painter = painterResource(id = getIcon(state.weather?.hourly?.weather_code?.first() ?: 0)),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(256.dp)
+                                )
+                            }
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.BottomStart
+                            ){
+                                Text(
+                                    text = "${state.weather?.hourly?.temperature_2m?.first()}°",
+                                    fontSize = MaterialTheme.typography.displayLarge.fontSize,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                        Card(
                             modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth()
+                                .weight(1f)
+                                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                         ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                modifier = Modifier.fillMaxWidth().padding(top = 48.dp, start = 24.dp, bottom = 24.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.Start
-                                ) {
-                                    Text(
-                                        text = "${state.weather?.current?.temperature_2m} ${state.weather?.current_units?.temperature_2m}",
-                                        fontSize = MaterialTheme.typography.displayMedium.fontSize,
-                                        fontWeight = MaterialTheme.typography.displayMedium.fontWeight
-                                    )
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.wind),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Text(
-                                            text = "${state.weather?.current?.wind_speed_10m} ${state.weather?.current_units?.wind_speed_10m}",
-                                            fontSize = MaterialTheme.typography.titleSmall.fontSize,
-                                            fontWeight = MaterialTheme.typography.titleSmall.fontWeight
-                                        )
-                                    }
-                                }
-                                Box(
-                                    modifier = Modifier.weight(1f),
-                                    contentAlignment = Alignment.TopEnd
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.LocationOn,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Text(
-                                            text = "${String.format("%.2f", state.weather?.latitude)}° ${String.format("%.2f", state.weather?.longitude)}°",
-                                            fontSize = MaterialTheme.typography.titleSmall.fontSize,
-                                            fontWeight = MaterialTheme.typography.titleSmall.fontWeight
-                                        )
-                                    }
-
-                                    state.weather?.current?.weather_code?.let { weather_code ->
-                                        Image(
-                                            painter = painterResource(id = getIcon(weather_code)),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(128.dp)
-                                                .padding(top = 8.dp)
-                                                .offset(x = 20.dp, y = 20.dp)
-                                        )
-                                    }
-                                }
-
+                                Text(
+                                    text = "Právě teď",
+                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                )
                             }
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                Column {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center
+                                    ){
+                                        Box(modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(MaterialTheme.colorScheme.primary),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            Text(
+                                                text = "°C",
+                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column {
+                                            Text("Pocitově", fontWeight = FontWeight.Thin)
+                                            Text("${state.weather?.hourly?.apparent_temperature?.first()}°", fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center
+                                    ){
+                                        Box(modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(MaterialTheme.colorScheme.primary),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            Icon(
+                                                painter = painterResource(R.drawable.umbrella),
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column {
+                                            Text("Srážky", fontWeight = FontWeight.Thin)
+                                            Text("${state.weather?.hourly?.precipitation_probability?.first()} %", fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center
+                                    ){
+                                        Box(modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(MaterialTheme.colorScheme.primary),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            Icon(
+                                                painter = painterResource(R.drawable.rain_icon),
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column {
+                                            Text("Déšť", fontWeight = FontWeight.Thin)
+                                            Text("${state.weather?.hourly?.precipitation?.first()} mm", fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                                Column {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center
 
+                                    ){
+                                        Box(modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(MaterialTheme.colorScheme.primary),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            Icon(
+                                                painter = painterResource(R.drawable.wind),
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(32.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column {
+                                            Text("Vítr", fontWeight = FontWeight.Thin)
+                                            Text("${state.weather?.hourly?.wind_speed_10m?.first()} ${state.weather?.hourly_units?.wind_speed_10m}", fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center
+
+                                    ){
+                                        Box(modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(MaterialTheme.colorScheme.primary),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            Icon(
+                                                painter = painterResource(R.drawable.drop),
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column {
+                                            Text("Vlhokost", fontWeight = FontWeight.Thin)
+                                            Text("${state.weather?.hourly?.relative_humidity_2m?.first()} %", fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center
+
+                                    ){
+                                        Box(modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(MaterialTheme.colorScheme.primary),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            Icon(
+                                                painter = painterResource(R.drawable.sun_icon),
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Column {
+                                            Text("UV Index", fontWeight = FontWeight.Thin)
+                                            Text("${state.weather?.daily?.uv_index_max?.first()?.toInt()} / 10", fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

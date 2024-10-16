@@ -12,15 +12,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
 
 @Composable
 fun SearchBox(
@@ -28,19 +31,22 @@ fun SearchBox(
     value: String,
     onValueChange: (String) -> Unit,
     onSearch: () -> Unit,
+    onSearchTriggered: () -> Unit,
     focus: FocusRequester,
     shouldShowHint: Boolean
 ) {
 
     val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-
+    var shouldTriggerSearch by remember { mutableStateOf(false) }
 
 
     TextField(
         modifier = modifier.focusRequester(focus),
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = {
+            onValueChange(it)
+            shouldTriggerSearch = true
+        },
         placeholder = {
             if (shouldShowHint) {
                 Text(text = "Search...")
@@ -75,5 +81,12 @@ fun SearchBox(
     LaunchedEffect(Unit) {
         delay(100)
         focus.requestFocus()
+    }
+    LaunchedEffect(shouldTriggerSearch) {
+        if (shouldTriggerSearch) {
+            delay(500)
+            onSearchTriggered()
+            shouldTriggerSearch = false
+        }
     }
 }

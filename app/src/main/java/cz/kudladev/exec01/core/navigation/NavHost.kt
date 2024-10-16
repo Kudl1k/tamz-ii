@@ -25,7 +25,7 @@ fun NavigationHost(
         startDestination = Routes.Root.route
     ) {
         navigation(
-            startDestination = Routes.InvestmentCalc.route,
+            startDestination = Routes.Weather.route,
             route = Routes.Root.route
         ){
             composable(route = Routes.InvestmentCalc.route){
