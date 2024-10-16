@@ -1,27 +1,23 @@
-package cz.kudladev.exec01.core.presentation.screens.graphs
+package cz.kudladev.exec01.core.presentation.screens.weather
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.get
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
 import cz.kudladev.exec01.core.data.api.WeatherApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 import retrofit2.HttpException
 
 
-class GraphsScreenViewModel(
+class WeatherScreenViewModel(
     weatherApi: WeatherApi,
     private val context: () -> Context
 ): ViewModel() {
 
-    private val _state = MutableStateFlow(GraphsScreenState())
+    private val _state = MutableStateFlow(WeatherScreenState())
     val state = _state.asStateFlow()
 
     init {
@@ -32,10 +28,10 @@ class GraphsScreenViewModel(
         viewModelScope.launch {
             try {
                 val weather = weatherApi.getWeatherForecast(
-                latitude = String.format("%.2f", _state.value.latitude),
-                longitude = String.format("%.2f", _state.value.longitude),
-                currentParameters = "temperature_2m,wind_speed_10m",
-                hourlyParameters = "temperature_2m,relative_humidity_2m,wind_speed_10m"
+                    latitude = String.format("%.2f", _state.value.latitude),
+                    longitude = String.format("%.2f", _state.value.longitude),
+                    currentParameters = "temperature_2m,wind_speed_10m,weather_code",
+                    hourlyParameters = "temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code",
                 )
                 Log.d("weather", weather.toString())
                 _state.value = _state.value.copy(
@@ -53,9 +49,10 @@ class GraphsScreenViewModel(
     private fun fetchLastLocation(weatherApi: WeatherApi) {
         try {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context.invoke())
-            fusedLocationClient.lastLocation
+            val location = fusedLocationClient.lastLocation
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful && task.result != null) {
+                        Log.d("location", "success")
                         val location = task.result
                         _state.value = _state.value.copy(
                             latitude = location.latitude,
@@ -64,6 +61,7 @@ class GraphsScreenViewModel(
                         Log.d("location", "latitude: ${location.latitude}, longitude: ${location.longitude}")
                         fetchWeatherForecast(weatherApi)
                     } else {
+                        Log.d("location", "error")
                         _state.value = _state.value.copy(
                             permissionsGranted = false,
                             error = "Couldn't retrieve location. Make sure to grant permission and enable GPS."
@@ -79,9 +77,9 @@ class GraphsScreenViewModel(
 
 
 
-    fun onEvent(event: GraphsScreenEvents){
+    fun onEvent(event: WeatherScreenEvents){
         when (event) {
-            GraphsScreenEvents.TogglePermissions -> {
+            WeatherScreenEvents.TogglePermissions -> {
                 _state.value = _state.value.copy(
                     permissionsGranted = !_state.value.permissionsGranted
                 )

@@ -23,7 +23,7 @@ fun NavDrawer(
 ) {
     val routes = listOf(
         Routes.InvestmentCalc,
-        Routes.Graphs,
+        Routes.Weather,
         Routes.API,
         Routes.Scanner,
     )

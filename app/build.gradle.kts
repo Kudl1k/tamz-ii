@@ -85,4 +85,6 @@ dependencies {
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+    implementation("com.google.android.gms:play-services-tasks:18.0.2")
+
 }

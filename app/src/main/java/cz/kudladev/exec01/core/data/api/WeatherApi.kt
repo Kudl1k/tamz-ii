@@ -12,7 +12,7 @@ interface WeatherApi {
         @Query("longitude") longitude: String,
         @Query("current") currentParameters: String,
         @Query("hourly") hourlyParameters: String,
-        @Query("timezone") timezone: String = "auto"
+        @Query("timezone") timezone: String = "auto",
     ): Weather
 
 

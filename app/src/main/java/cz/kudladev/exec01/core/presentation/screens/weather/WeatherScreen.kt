@@ -1,4 +1,4 @@
-package cz.kudladev.exec01.core.presentation.screens.graphs
+package cz.kudladev.exec01.core.presentation.screens.weather
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -32,7 +32,7 @@ import cz.kudladev.exec01.core.presentation.components.TopAppBarWithDrawer
 import kotlinx.coroutines.launch
 
 @Composable
-fun GraphsScreen(modifier: Modifier = Modifier,navController: NavController, state: GraphsScreenState, onEvent: (GraphsScreenEvents) -> Unit) {
+fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, state: WeatherScreenState, onEvent: (WeatherScreenEvents) -> Unit) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -41,9 +41,9 @@ fun GraphsScreen(modifier: Modifier = Modifier,navController: NavController, sta
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (!isGranted) {
-            onEvent(GraphsScreenEvents.TogglePermissions)
+            onEvent(WeatherScreenEvents.TogglePermissions)
         } else if (isGranted && !state.permissionsGranted) {
-            onEvent(GraphsScreenEvents.TogglePermissions)
+            onEvent(WeatherScreenEvents.TogglePermissions)
         }
     }
     val permissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)

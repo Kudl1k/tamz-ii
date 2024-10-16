@@ -10,8 +10,8 @@ import androidx.navigation.compose.navigation
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
-import cz.kudladev.exec01.core.presentation.screens.graphs.GraphsScreen
-import cz.kudladev.exec01.core.presentation.screens.graphs.GraphsScreenViewModel
+import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreen
+import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculator
 import org.koin.androidx.compose.koinViewModel
@@ -44,11 +44,11 @@ fun NavigationHost(
                 val onEvent = viewModel::onEvent
                 APIScreen(navController = navHostController, state = state, onEvent = onEvent)
             }
-            composable(route = Routes.Graphs.route){
-                val viewModel: GraphsScreenViewModel = koinViewModel()
+            composable(route = Routes.Weather.route){
+                val viewModel: WeatherScreenViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
                 val onEvent = viewModel::onEvent
-                GraphsScreen(navController = navHostController, state = state, onEvent = onEvent)
+                WeatherScreen(navController = navHostController, state = state, onEvent = onEvent)
             }
         }
 
