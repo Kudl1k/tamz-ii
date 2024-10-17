@@ -247,7 +247,7 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                     contentAlignment = Alignment.BottomStart
                                 ){
                                     Text(
-                                        text = "${state.weather?.hourly?.temperature_2m?.first()}°",
+                                        text = "${state.currentWeather?.temperature_2m}°",
                                         fontSize = MaterialTheme.typography.displayLarge.fontSize,
                                         fontWeight = FontWeight.ExtraBold
                                     )
@@ -291,7 +291,7 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Column {
                                                 Text("Pocitově", fontWeight = FontWeight.Thin)
-                                                Text("${state.weather?.hourly?.apparent_temperature?.first()}°", fontWeight = FontWeight.Bold)
+                                                Text("${state.currentWeather?.apparent_temperature}°", fontWeight = FontWeight.Bold)
                                             }
                                         }
                                         Spacer(modifier = Modifier.height(16.dp))
@@ -314,7 +314,7 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Column {
                                                 Text("Srážky", fontWeight = FontWeight.Thin)
-                                                Text("${state.weather?.hourly?.precipitation_probability?.first()} %", fontWeight = FontWeight.Bold)
+                                                Text("${state.currentWeather?.precipitation_probability} %", fontWeight = FontWeight.Bold)
                                             }
                                         }
                                         Spacer(modifier = Modifier.height(16.dp))
@@ -337,7 +337,7 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Column {
                                                 Text("Déšť", fontWeight = FontWeight.Thin)
-                                                Text("${state.weather?.hourly?.precipitation?.first()} mm", fontWeight = FontWeight.Bold)
+                                                Text("${state.currentWeather?.precipitation} mm", fontWeight = FontWeight.Bold)
                                             }
                                         }
                                     }
@@ -362,7 +362,7 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Column {
                                                 Text("Vítr", fontWeight = FontWeight.Thin)
-                                                Text("${state.weather?.hourly?.wind_speed_10m?.first()} ${state.weather?.hourly_units?.wind_speed_10m}", fontWeight = FontWeight.Bold)
+                                                Text("${state.currentWeather?.wind_speed_10m} ${state.weather?.hourly_units?.wind_speed_10m}", fontWeight = FontWeight.Bold)
                                             }
                                         }
                                         Spacer(modifier = Modifier.height(16.dp))
@@ -386,7 +386,7 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Column {
                                                 Text("Vlhokost", fontWeight = FontWeight.Thin)
-                                                Text("${state.weather?.hourly?.relative_humidity_2m?.first()} %", fontWeight = FontWeight.Bold)
+                                                Text("${state.currentWeather?.relative_humidity_2m} %", fontWeight = FontWeight.Bold)
                                             }
                                         }
                                         Spacer(modifier = Modifier.height(16.dp))
@@ -439,14 +439,16 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                             )
                                         ),
                                         onClick = {
-
+                                            onEvent(WeatherScreenEvents.setPlace(suggestion.mapbox_id))
+                                            onEvent(WeatherScreenEvents.ToggleSearchBox)
                                         }
                                     )
                                 } else {
                                     DropDownSearchItem(
                                         suggestion = suggestion,
                                         onClick = {
-
+                                            onEvent(WeatherScreenEvents.setPlace(suggestion.mapbox_id))
+                                            onEvent(WeatherScreenEvents.ToggleSearchBox)
                                         }
                                     )
                                 }

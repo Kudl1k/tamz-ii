@@ -45,7 +45,9 @@ fun SearchBox(
         value = value,
         onValueChange = {
             onValueChange(it)
-            shouldTriggerSearch = true
+            if (it.isNotBlank()){
+                shouldTriggerSearch = true
+            }
         },
         placeholder = {
             if (shouldShowHint) {
@@ -85,7 +87,9 @@ fun SearchBox(
     LaunchedEffect(shouldTriggerSearch) {
         if (shouldTriggerSearch) {
             delay(500)
-            onSearchTriggered()
+            if (value.isNotBlank()){
+                onSearchTriggered()
+            }
             shouldTriggerSearch = false
         }
     }
