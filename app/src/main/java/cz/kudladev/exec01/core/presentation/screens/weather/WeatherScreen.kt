@@ -4,9 +4,12 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +24,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -46,6 +52,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -69,6 +76,8 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
         FocusRequester()
     }
 
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     val searchBoxHeight = animateDpAsState( // Direct assignment
         targetValue = if (state.showSearchBox) 75.dp else 0.dp,
         animationSpec = tween(durationMillis = 300)
@@ -82,6 +91,11 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
 
     val searchVisibility = animateFloatAsState(
         targetValue = if (state.showSearchBox) 0f else 1f,
+        animationSpec = tween(durationMillis = 300)
+    ).value
+
+    val dropdownVisibility = animateFloatAsState(
+        targetValue = if (state.showSearchBox && state.searchResults != null) 1f else 0f,
         animationSpec = tween(durationMillis = 300)
     ).value
 
@@ -134,7 +148,9 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = null,
-                                    modifier = Modifier.size(24.dp).alpha(searchVisibility)
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .alpha(searchVisibility)
                                 )
                             }
                         }
@@ -142,252 +158,260 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                 )
             }
         ) {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it),
-                horizontalAlignment = Alignment.Start,
-            ) {
-                Box(
+                    .padding(it)
+            ){
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(searchBoxHeight) // Use searchBoxHeight directly
-                        .offset(y = searchBoxOffset) // Use searchBoxOffset directly
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.Start,
                 ) {
-                    if (state.showSearchBox){
-                        SearchBox(
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(searchBoxHeight) // Use searchBoxHeight directly
+                            .offset(y = searchBoxOffset) // Use searchBoxOffset directly
+                    ) {
+                        if (state.showSearchBox){
+                            SearchBox(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                value = state.searchQuery,
+                                onValueChange = { query ->
+                                    onEvent(WeatherScreenEvents.setSearchQuery(query))
+                                },
+                                onSearch = {
+                                    onEvent(WeatherScreenEvents.ToggleSearchBox)
+                                },
+                                onSearchTriggered = {
+                                    onEvent(WeatherScreenEvents.Search)
+                                },
+                                focus = focus,
+                                shouldShowHint = true
+                            )
+                        }
+                    }
+                    if (!state.error.isNullOrBlank()){
+                        Text(text = state.error)
+                    } else if (state.place != null){
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp),
-                            value = state.searchQuery,
-                            onValueChange = { query ->
-                                onEvent(WeatherScreenEvents.setSearchQuery(query))
-                            },
-                            onSearch = {
-                                if (!state.searchQuery.isNotBlank()) {
-                                    onEvent(WeatherScreenEvents.ToggleSearchBox)
-                                }
-                            },
-                            onSearchTriggered = {
-                                onEvent(WeatherScreenEvents.Search)
-                            },
-                            focus = focus,
-                            shouldShowHint = true
-                        )
-                    }
-                }
-
-                if (!state.error.isNullOrBlank()){
-                    Text(text = state.error)
-                } else if (state.place != null){
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f)
                         ) {
-                            Text(
-                                text = state.place.features[0].properties.context.place.name,
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize
-                            )
-                            Text(
-                                text = "${state.place.features[0].properties.context.region.name}, ${state.place.features[0].properties.context.country.name}",
-                                fontSize = MaterialTheme.typography.labelSmall.fontSize
-                            )
-                        }
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            horizontalAlignment = Alignment.End
-                        ) {
-                            val time = state.weather?.current?.time?.split("T")
-                            Text(
-                                text = "${time?.get(0)} ${time?.get(1)}",
-                            )
-                        }
-                    }
-                    Column(
-                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-                    ) {
-                        Box(
-                           modifier = Modifier.weight(1f)
-                        ){
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ){
-                                Image(
-                                    painter = painterResource(id = getIcon(state.weather?.hourly?.weather_code?.first() ?: 0)),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(256.dp)
-                                )
-                            }
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.BottomStart
-                            ){
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(
-                                    text = "${state.weather?.hourly?.temperature_2m?.first()}°",
-                                    fontSize = MaterialTheme.typography.displayLarge.fontSize,
-                                    fontWeight = FontWeight.ExtraBold
+                                    text = state.place.features[0].properties.context.place.name,
+                                    fontSize = MaterialTheme.typography.titleLarge.fontSize
+                                )
+                                Text(
+                                    text = "${state.place.features[0].properties.context.region.name}, ${state.place.features[0].properties.context.country.name}",
+                                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                                )
+                            }
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.End
+                            ) {
+                                val time = state.weather?.current?.time?.split("T")
+                                Text(
+                                    text = "${time?.get(0)} ${time?.get(1)}",
                                 )
                             }
                         }
-                        Card(
+                        Column(
                             modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(top = 48.dp, start = 24.dp, bottom = 24.dp)
-                            ) {
-                                Text(
-                                    text = "Právě teď",
-                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                )
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                Column {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center
-                                    ){
-                                        Box(modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(MaterialTheme.colorScheme.primary),
-                                            contentAlignment = Alignment.Center
-                                        ){
-                                            Text(
-                                                text = "°C",
-                                                color = MaterialTheme.colorScheme.onPrimary,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text("Pocitově", fontWeight = FontWeight.Thin)
-                                            Text("${state.weather?.hourly?.apparent_temperature?.first()}°", fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center
-                                    ){
-                                        Box(modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(MaterialTheme.colorScheme.primary),
-                                            contentAlignment = Alignment.Center
-                                        ){
-                                            Icon(
-                                                painter = painterResource(R.drawable.umbrella),
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text("Srážky", fontWeight = FontWeight.Thin)
-                                            Text("${state.weather?.hourly?.precipitation_probability?.first()} %", fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center
-                                    ){
-                                        Box(modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(MaterialTheme.colorScheme.primary),
-                                            contentAlignment = Alignment.Center
-                                        ){
-                                            Icon(
-                                                painter = painterResource(R.drawable.rain_icon),
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text("Déšť", fontWeight = FontWeight.Thin)
-                                            Text("${state.weather?.hourly?.precipitation?.first()} mm", fontWeight = FontWeight.Bold)
-                                        }
-                                    }
+                            Box(
+                                modifier = Modifier.weight(1f)
+                            ){
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ){
+                                    Image(
+                                        painter = painterResource(id = getIcon(state.weather?.hourly?.weather_code?.first() ?: 0)),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(256.dp)
+                                    )
                                 }
-                                Column {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center
-
-                                    ){
-                                        Box(modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(MaterialTheme.colorScheme.primary),
-                                            contentAlignment = Alignment.Center
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.BottomStart
+                                ){
+                                    Text(
+                                        text = "${state.weather?.hourly?.temperature_2m?.first()}°",
+                                        fontSize = MaterialTheme.typography.displayLarge.fontSize,
+                                        fontWeight = FontWeight.ExtraBold
+                                    )
+                                }
+                            }
+                            Card(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 48.dp, start = 24.dp, bottom = 24.dp)
+                                ) {
+                                    Text(
+                                        text = "Právě teď",
+                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Column {
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center
                                         ){
-                                            Icon(
-                                                painter = painterResource(R.drawable.wind),
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier.size(32.dp)
-                                            )
+                                            Box(modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(RoundedCornerShape(50))
+                                                .background(MaterialTheme.colorScheme.primary),
+                                                contentAlignment = Alignment.Center
+                                            ){
+                                                Text(
+                                                    text = "°C",
+                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column {
+                                                Text("Pocitově", fontWeight = FontWeight.Thin)
+                                                Text("${state.weather?.hourly?.apparent_temperature?.first()}°", fontWeight = FontWeight.Bold)
+                                            }
                                         }
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text("Vítr", fontWeight = FontWeight.Thin)
-                                            Text("${state.weather?.hourly?.wind_speed_10m?.first()} ${state.weather?.hourly_units?.wind_speed_10m}", fontWeight = FontWeight.Bold)
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center
+                                        ){
+                                            Box(modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(RoundedCornerShape(50))
+                                                .background(MaterialTheme.colorScheme.primary),
+                                                contentAlignment = Alignment.Center
+                                            ){
+                                                Icon(
+                                                    painter = painterResource(R.drawable.umbrella),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column {
+                                                Text("Srážky", fontWeight = FontWeight.Thin)
+                                                Text("${state.weather?.hourly?.precipitation_probability?.first()} %", fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center
+                                        ){
+                                            Box(modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(RoundedCornerShape(50))
+                                                .background(MaterialTheme.colorScheme.primary),
+                                                contentAlignment = Alignment.Center
+                                            ){
+                                                Icon(
+                                                    painter = painterResource(R.drawable.rain_icon),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column {
+                                                Text("Déšť", fontWeight = FontWeight.Thin)
+                                                Text("${state.weather?.hourly?.precipitation?.first()} mm", fontWeight = FontWeight.Bold)
+                                            }
                                         }
                                     }
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center
+                                    Column {
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center
 
-                                    ){
-                                        Box(modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(MaterialTheme.colorScheme.primary),
-                                            contentAlignment = Alignment.Center
                                         ){
-                                            Icon(
-                                                painter = painterResource(R.drawable.drop),
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
+                                            Box(modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(RoundedCornerShape(50))
+                                                .background(MaterialTheme.colorScheme.primary),
+                                                contentAlignment = Alignment.Center
+                                            ){
+                                                Icon(
+                                                    painter = painterResource(R.drawable.wind),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(32.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column {
+                                                Text("Vítr", fontWeight = FontWeight.Thin)
+                                                Text("${state.weather?.hourly?.wind_speed_10m?.first()} ${state.weather?.hourly_units?.wind_speed_10m}", fontWeight = FontWeight.Bold)
+                                            }
                                         }
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text("Vlhokost", fontWeight = FontWeight.Thin)
-                                            Text("${state.weather?.hourly?.relative_humidity_2m?.first()} %", fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center
 
-                                    ){
-                                        Box(modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(MaterialTheme.colorScheme.primary),
-                                            contentAlignment = Alignment.Center
                                         ){
-                                            Icon(
-                                                painter = painterResource(R.drawable.sun_icon),
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
+                                            Box(modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(RoundedCornerShape(50))
+                                                .background(MaterialTheme.colorScheme.primary),
+                                                contentAlignment = Alignment.Center
+                                            ){
+                                                Icon(
+                                                    painter = painterResource(R.drawable.drop),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column {
+                                                Text("Vlhokost", fontWeight = FontWeight.Thin)
+                                                Text("${state.weather?.hourly?.relative_humidity_2m?.first()} %", fontWeight = FontWeight.Bold)
+                                            }
                                         }
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            Text("UV Index", fontWeight = FontWeight.Thin)
-                                            Text("${state.weather?.daily?.uv_index_max?.first()?.toInt()} / 10", fontWeight = FontWeight.Bold)
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center
+
+                                        ){
+                                            Box(modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(RoundedCornerShape(50))
+                                                .background(MaterialTheme.colorScheme.primary),
+                                                contentAlignment = Alignment.Center
+                                            ){
+                                                Icon(
+                                                    painter = painterResource(R.drawable.sun_icon),
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column {
+                                                Text("UV Index", fontWeight = FontWeight.Thin)
+                                                Text("${state.weather?.daily?.uv_index_max?.first()?.toInt()} / 10", fontWeight = FontWeight.Bold)
+                                            }
                                         }
                                     }
                                 }
@@ -395,7 +419,45 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                         }
                     }
                 }
+                if (state.searchResults != null && state.showSearchBox){
+                    AnimatedVisibility(
+                        visible = state.showSearchBox && state.searchResults != null,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 300)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 300))
+                    ){
+                        LazyColumn(
+                            modifier = Modifier.padding(top = 70.dp).alpha(dropdownVisibility)
+                        ) {
+                            itemsIndexed(state.searchResults.suggestions){ index, suggestion ->
+                                if (index == state.searchResults.suggestions.lastIndex){
+                                    DropDownSearchItem(
+                                        suggestion = suggestion,
+                                        modifier = Modifier.clip(
+                                            RoundedCornerShape(
+                                                bottomStart = 15.dp,
+                                                bottomEnd = 15.dp
+                                            )
+                                        ),
+                                        onClick = {
+
+                                        }
+                                    )
+                                } else {
+                                    DropDownSearchItem(
+                                        suggestion = suggestion,
+                                        onClick = {
+
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                }
+
             }
+
         }
     }
 }

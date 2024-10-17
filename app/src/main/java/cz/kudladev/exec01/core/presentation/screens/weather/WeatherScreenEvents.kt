@@ -10,4 +10,6 @@ sealed class WeatherScreenEvents {
 
     data object Search : WeatherScreenEvents()
 
+    data class setPlace(val id: String) : WeatherScreenEvents()
+
 }

@@ -1,10 +1,11 @@
 package cz.kudladev.exec01.core.data.api
 
 import cz.kudladev.exec01.core.domain.dto.location.GeocodeReverseResponse
+import cz.kudladev.exec01.core.domain.dto.location.retrive.RetrieveResponse
 import cz.kudladev.exec01.core.domain.dto.location.searchgeo.GeocodeSearchResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
-import java.util.UUID
+import retrofit2.http.Path
 
 interface GeoApi {
 
@@ -17,14 +18,24 @@ interface GeoApi {
     ) : GeocodeReverseResponse
 
 
-    @GET("search/geocode/v6/forward")
+    @GET("search/searchbox/v1/suggest")
     suspend fun searchSuggestions(
         @Query("q") query: String,
-        @Query("language") language: String = "cs", // Default language to Czech
-        @Query("proximity") proximity: String? = "-73.990593,40.740121", // Optional proximity
-        @Query("session_token") sessionToken: String = UUID.randomUUID().toString(), // Generate a unique session token
+        @Query("language") language: String = "en", // Default to English
+        @Query("limit") limit: Int = 4, // Default to 10 results
+        @Query("session_token") sessionToken: String,
+        @Query("proximity") proximity: String? = null, // Optional proximity
+        @Query("country") country: String? = null, // Optional country code
         @Query("access_token") accessToken: String = TOKEN
     ): GeocodeSearchResponse
+
+    @GET("search/searchbox/v1/retrieve/{mapbox_id}")
+    suspend fun retrieveFeatureDetails(
+        @Path("mapbox_id") mapboxId: String,
+        @Query("session_token") sessionToken: String,
+        @Query("access_token") accessToken: String = TOKEN
+    ): RetrieveResponse
+
 
     companion object {
         const val TOKEN = "pk.eyJ1Ijoia3VkbDFrIiwiYSI6ImNtMmJ1bHJoMTBweGYya3F3MXZzaWY4MjQifQ.H6srO2K-LkW6A53Ba37duw"

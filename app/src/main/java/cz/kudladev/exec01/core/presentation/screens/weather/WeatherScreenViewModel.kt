@@ -113,7 +113,11 @@ class WeatherScreenViewModel(
         viewModelScope.launch{
             try {
                 val result = geoApi.searchSuggestions(
-                    query = _state.value.searchQuery
+                    query = _state.value.searchQuery,
+                    sessionToken = _state.value.sessionId
+                )
+                _state.value = _state.value.copy(
+                    searchResults = result
                 )
                 Log.d("location", result.toString())
             } catch (e: HttpException){
@@ -122,6 +126,30 @@ class WeatherScreenViewModel(
                     error = "${e.code()}: ${e.message()}"
                 )
             } catch (e : Exception){
+                Log.d("location", "error:${e.message}")
+                _state.value = _state.value.copy(
+                    error = e.message
+                )
+            }
+        }
+    }
+
+    private fun retrieveLocation(id: String){
+        viewModelScope.launch{
+            try {
+                val result = geoApi.retrieveFeatureDetails(
+                    mapboxId = id,
+                    sessionToken = _state.value.sessionId
+                )
+                _state.value = _state.value.copy(
+
+                )
+            } catch (e: HttpException){
+                Log.d("location", "error:${e.message()}")
+                _state.value = _state.value.copy(
+                    error = "${e.code()}: ${e.message()}"
+                )
+            } catch (e: Exception){
                 Log.d("location", "error:${e.message}")
                 _state.value = _state.value.copy(
                     error = e.message
@@ -152,6 +180,11 @@ class WeatherScreenViewModel(
 
             WeatherScreenEvents.Search -> {
                 searchLocation(geoApi = geoApi)
+            }
+
+            is WeatherScreenEvents.setPlace -> {
+                val mapboxid = event.id
+
             }
         }
     }
