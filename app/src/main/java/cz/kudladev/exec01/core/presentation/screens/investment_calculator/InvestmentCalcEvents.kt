@@ -9,4 +9,9 @@ sealed class InvestmentCalcEvents {
 
     object ToggleChartType: InvestmentCalcEvents()
     object ToggleRepeatableInvestment: InvestmentCalcEvents()
+
+    object SaveToHistory: InvestmentCalcEvents()
+    data class SetHistoryItem(val index: Int): InvestmentCalcEvents()
+    object RemoveHistory: InvestmentCalcEvents()
+
 }

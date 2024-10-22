@@ -10,6 +10,8 @@ import cz.kudladev.exec01.core.data.api.WeatherApi
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
+import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreenViewModel
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -55,13 +57,22 @@ val coreModule = module {
         androidContext().dataStore
     }
 
+    single<Context>{
+        androidApplication()
+    }
+
     viewModel {
         InvestmentCalculatorViewModel(
-            get<DataStore<Preferences>>()
+            get<DataStore<Preferences>>(),
+            get<Context>()
         )
     }
     viewModel {
         APIScreenViewModel(get())
+    }
+
+    viewModel{
+        ScannerScreenViewModel()
     }
 
     viewModel{

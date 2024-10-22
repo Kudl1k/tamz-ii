@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -11,7 +12,9 @@ sealed class Routes(val route: String, val title: String? = null, val icon: Imag
 
     data object Root : Routes(route = "root")
 
+    data object InvestmentNav : Routes(route = "investment_nav", title = "Investiční kalkulačka", icon = Icons.Default.Calculate)
     data object InvestmentCalc : Routes(route = "investment_calc", title = "Investiční kalkulačka", icon = Icons.Default.Calculate)
+    data object InvestmentCalcHistory : Routes(route = "investment_calc_history", title = "Historie", icon = Icons.Default.History)
     data object Weather: Routes(route = "weather", title = "Počasí", icon = Icons.Default.Cloud)
 
     data object Scanner : Routes(route = "scanner", title = "Scanner", icon = Icons.Default.QrCodeScanner)

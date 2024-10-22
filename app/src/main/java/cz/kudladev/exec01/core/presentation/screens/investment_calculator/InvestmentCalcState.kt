@@ -6,6 +6,19 @@ import androidx.datastore.preferences.core.intPreferencesKey
 
 data class InvestmentCalcState(
     val loaded: Boolean = false,
+    val history: List<InvestmentCalcHistoryStates> = emptyList(),
+    val resultedMoney: Double = 0.0,
+    val resultedInterestMoney: Double = 0.0,
+    val startbalance: Double = 1000.0,
+    val interest: Double = 2.0,
+    val length: Int = 4,
+    val pieChartToggle: Boolean = false,
+    val barChartToggle: Boolean = true,
+    val repeatableInvestment: Boolean = false,
+    val repeatableInvestmentAmount: Double = 0.0
+)
+
+data class InvestmentCalcHistoryStates(
     val resultedMoney: Double = 0.0,
     val resultedInterestMoney: Double = 0.0,
     val startbalance: Double = 1000.0,

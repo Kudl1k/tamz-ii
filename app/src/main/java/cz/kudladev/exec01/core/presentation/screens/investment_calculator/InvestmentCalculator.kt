@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -29,8 +31,10 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -46,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -61,10 +66,12 @@ import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @Composable
 fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavController, state: InvestmentCalcState, onEvent: (InvestmentCalcEvents) -> Unit) {
     val route = Routes.InvestmentCalc
+    val history = Routes.InvestmentCalcHistory
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -103,10 +110,11 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                                 contentDescription = null
                             )
                         }
-                        DropdownMenu(expanded = enableDropDownMenu, onDismissRequest = { enableDropDownMenu = false }) {
+                        DropdownMenu(expanded = enableDropDownMenu, onDismissRequest = { enableDropDownMenu = false }, modifier = Modifier.clip(RoundedCornerShape(15))) {
                             DropdownMenuItem(
                                 text = { Text("Pravidelný vklad") },
                                 onClick = {
+                                    enableDropDownMenu = false
                                     onEvent(InvestmentCalcEvents.ToggleRepeatableInvestment)
                                 },
                                 leadingIcon = {
@@ -115,6 +123,33 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                                     } else {
                                         Icon(Icons.Filled.CheckCircle, contentDescription = null)
                                     }
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Uložit do historie") },
+                                onClick = {
+                                    enableDropDownMenu = false
+                                    onEvent(InvestmentCalcEvents.SaveToHistory)
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Outlined.SaveAlt, contentDescription = null)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(history.title ?: "")
+                                },
+                                leadingIcon = {
+                                    history.icon?.let {
+                                        Icon(
+                                            imageVector = it,
+                                            contentDescription = ""
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    enableDropDownMenu = false
+                                    navController.navigate(history.route)
                                 }
                             )
                         }
@@ -285,7 +320,12 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                                 onEvent(InvestmentCalcEvents.setBalance(it.toDouble()))
                             },
                             valueRange = 0f..1000000f,
+                            colors = SliderDefaults.colors(
+
+                            )
                         )
+
+
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -316,7 +356,7 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                                 text = "Délka"
                             )
                             Text(
-                                text = "${state.length} roků"
+                                text = "${state.length} měsíců"
                             )
                         }
                         Slider(

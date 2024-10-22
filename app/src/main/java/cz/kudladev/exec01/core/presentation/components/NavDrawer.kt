@@ -22,7 +22,7 @@ fun NavDrawer(
     screenContent: @Composable () -> Unit
 ) {
     val routes = listOf(
-        Routes.InvestmentCalc,
+        Routes.InvestmentNav,
         Routes.Weather,
         Routes.API,
         Routes.Scanner,

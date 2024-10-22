@@ -455,11 +455,8 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                             }
                         }
                     }
-
                 }
-
             }
-
         }
     }
 }

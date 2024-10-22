@@ -1,11 +1,16 @@
 package cz.kudladev.exec01.core.presentation.screens.investment_calculator
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -14,17 +19,19 @@ import kotlinx.coroutines.launch
 import kotlin.math.pow
 
 class InvestmentCalculatorViewModel(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val context: Context
 ): ViewModel() {
 
     private val _state = MutableStateFlow(InvestmentCalcState())
     val state = _state.asStateFlow()
 
+
     init {
         Log.d("InputScreenViewModel", "Initializing ViewModel")
         Log.d("InputScreenViewModel", "State: ${_state.value.loaded}")
         if (!_state.value.loaded) {
-            loadState()
+            loadHistory()
             Log.d("InputScreenViewModel", "State loaded")
             _state.value = _state.value.copy(loaded = true)
         }
@@ -92,6 +99,18 @@ class InvestmentCalculatorViewModel(
                     calculateResult()
                 }
             }
+
+            InvestmentCalcEvents.SaveToHistory -> {
+                saveToHistory()
+            }
+
+            is InvestmentCalcEvents.SetHistoryItem -> {
+                SetHistoryItem(event.index)
+            }
+
+            InvestmentCalcEvents.RemoveHistory -> {
+                removeHistory()
+            }
         }
     }
 
@@ -114,8 +133,6 @@ class InvestmentCalculatorViewModel(
             resultedMoney = finalCapital,
             resultedInterestMoney = interestEarned
         )
-        saveInputScreenState(_state.value)
-
     }
 
     private fun calculateRepeatableInvestment() {
@@ -140,14 +157,6 @@ class InvestmentCalculatorViewModel(
             resultedMoney = finalCapital,
             resultedInterestMoney = interestEarned
         )
-        saveInputScreenState(_state.value)
-    }
-
-    fun loadState() {
-        viewModelScope.launch {
-            loadInputScreenState()
-            saveInputScreenState(_state.value)
-        }
     }
 
     private suspend fun loadInputScreenState() {
@@ -173,6 +182,102 @@ class InvestmentCalculatorViewModel(
         }
     }
 
+    private fun loadHistory(){
+        Log.d("InputScreenViewModel","Loading history")
+        try {
+            val sharedPreferences = context.getSharedPreferences("history", Context.MODE_PRIVATE)
+            val gson = Gson()
+            val json = sharedPreferences.getString("investment_calc_states", null)
+            val type = object : TypeToken<List<InvestmentCalcHistoryStates>>() {}.type
+            val retrievedList: List<InvestmentCalcHistoryStates> = gson.fromJson(json, type)
+
+
+            Log.d("InputScreenViewModel","Loaded history: $retrievedList")
+
+            if (retrievedList.isNotEmpty()){
+                _state.value = _state.value.copy(
+                    history = retrievedList,
+                    loaded = true,
+                    resultedMoney = retrievedList.last().resultedMoney,
+                    resultedInterestMoney = retrievedList.last().resultedInterestMoney,
+                    startbalance = retrievedList.last().startbalance,
+                    interest = retrievedList.last().interest,
+                    length = retrievedList.last().length,
+                    pieChartToggle = retrievedList.last().pieChartToggle,
+                    barChartToggle = retrievedList.last().barChartToggle,
+                    repeatableInvestment = retrievedList.last().repeatableInvestment,
+                    repeatableInvestmentAmount = retrievedList.last().repeatableInvestmentAmount
+                )
+            } else {
+                _state.value = _state.value.copy(
+                    loaded = true
+                )
+            }
+        } catch (e: Exception){
+            Log.e("InputScreenViewModel","Error loading history",e)
+        }
+    }
+
+    private fun saveToHistory(){
+        Log.d("InputScreenViewModel","Saving to history")
+        try {
+            val sharedPreferences = context.getSharedPreferences("history", Context.MODE_PRIVATE)
+            val gson = Gson()
+            val newHistory = InvestmentCalcHistoryStates(
+                resultedMoney = _state.value.resultedMoney,
+                resultedInterestMoney = _state.value.resultedInterestMoney,
+                startbalance = _state.value.startbalance,
+                interest = _state.value.interest,
+                length = _state.value.length,
+                pieChartToggle = _state.value.pieChartToggle,
+                barChartToggle = _state.value.barChartToggle,
+                repeatableInvestment = _state.value.repeatableInvestment,
+                repeatableInvestmentAmount = _state.value.repeatableInvestmentAmount
+            )
+            val history = _state.value.history.toMutableList()
+            history.add(newHistory)
+            val json = gson.toJson(history)
+            sharedPreferences.edit().putString("investment_calc_states", json).apply()
+            _state.value = _state.value.copy(
+                history = history
+            )
+            Log.d("InputScreenViewModel","Saved to history")
+        } catch (e: Exception) {
+            Log.e("InputScreenViewModel","Error saving to history",e)
+        }
+    }
+
+    private fun SetHistoryItem(index: Int){
+        Log.d("InputScreenViewModel","Setting history item to index: $index",)
+        val historyItem = _state.value.history.getOrNull(index) // Get history item safely
+
+        if (historyItem != null) {
+            Log.d("InputScreenViewModel", "Setting history item to: $historyItem")
+            _state.value = _state.value.copy(
+                resultedMoney = historyItem.resultedMoney,
+                resultedInterestMoney = historyItem.resultedInterestMoney,
+                startbalance = historyItem.startbalance,
+                interest = historyItem.interest,
+                length = historyItem.length,
+                pieChartToggle = historyItem.pieChartToggle,
+                barChartToggle = historyItem.barChartToggle,
+                repeatableInvestment = historyItem.repeatableInvestment,
+                repeatableInvestmentAmount = historyItem.repeatableInvestmentAmount
+            )
+        }
+    }
+
+    private fun removeHistory(){
+        Log.d("InputScreenViewModel","Removing history")
+        val sharedPreferences = context.getSharedPreferences("history", Context.MODE_PRIVATE)
+        val gson = Gson()
+        sharedPreferences.edit().remove("investment_calc_states").apply()
+        _state.value = _state.value.copy(
+            history = emptyList()
+        )
+        Log.d("InputScreenViewModel","Removed history")
+    }
+
     fun saveInputScreenState(state: InvestmentCalcState) {
         Log.d("InputScreenViewModel", "Saving input screen state: $state")
         viewModelScope.launch {
@@ -190,6 +295,5 @@ class InvestmentCalculatorViewModel(
             }
         }
     }
-
 
 }

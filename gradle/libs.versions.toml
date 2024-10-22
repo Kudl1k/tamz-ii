@@ -20,7 +20,7 @@ kotlinxCoroutines = "1.3.9"
 coil = "2.7.0"
 gms = "21.0.1"
 playServicesLocation = "21.3.0"
-material3alpha = "1.4.0-alpha01"
+material3alpha = "1.4.0-alpha02"
 
 
 [libraries]
