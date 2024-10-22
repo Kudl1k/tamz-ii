@@ -86,6 +86,8 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
         FocusRequester()
     }
 
+
+
     NavDrawer(navController = navController, drawerState = drawerState) {
         Scaffold(
             topBar = {
@@ -99,6 +101,7 @@ fun InvestmentCalculator(modifier: Modifier = Modifier, navController: NavContro
                             }
                         }
                     },
+
                     actions = {
                         IconButton(
                             onClick = {

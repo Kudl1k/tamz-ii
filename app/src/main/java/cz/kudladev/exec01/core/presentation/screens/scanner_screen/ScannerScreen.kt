@@ -12,12 +12,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
@@ -28,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,11 +41,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -82,9 +88,12 @@ fun ScannerScreen(
             scanned = "Canceled"
         } else {
             Toast.makeText(context, "Scanned: " + result.contents, Toast.LENGTH_LONG).show()
-            scanned = result.contents
+            onEvent(ScannerScreenEvent.setCodeText(result.contents.dropLast(1)))
         }
     }
+
+
+    val transparentColor = androidx.compose.ui.graphics.Color.Transparent
 
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -125,33 +134,9 @@ fun ScannerScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                if (scanned.trim().isNotBlank()) {
-                    Image(
-                        bitmap = encodeAsBitmap(scanned).asImageBitmap(),
-                        contentDescription = null
-                    )
-                }
-//                Text(
-//                    text = "Scanned: $scanned"
-//                )
-//                Button(
-//                    onClick = {
-//                        val permissionCheckResult =
-//                            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-//                        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-//                            val options = ScanOptions()
-//                            options.setOrientationLocked(false)
-//                            options.setBeepEnabled(true)
-//                            options.setDesiredBarcodeFormats("UPC_A")
-//                            options.setPrompt("Scan a barcode")
-//                            barcodeLauncher.launch(options)
-//                        } else {
-//                            permissionLauncher.launch(Manifest.permission.CAMERA)
-//                        }
-//                    }
-//                ) {
-//                    Text("Scan")
-//                }
+
+
+
                 Box(
                     modifier = Modifier
                         .wrapContentSize(Alignment.Center) // Center content within the Box
@@ -165,19 +150,64 @@ fun ScannerScreen(
                         }
                     }
                 }
-                TextField(
-                    value = state.codeText,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    onValueChange = {
-                        onEvent(ScannerScreenEvent.setCodeText(it))
-                    },
-                    placeholder = {
-                        Text(text = "Enter UPC code")
-                    },
-
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextField(
+                        value = state.codeText,
+                        modifier = Modifier
+                            .weight(1f),
+                        onValueChange = {
+                            onEvent(ScannerScreenEvent.setCodeText(it))
+                        },
+                        placeholder = {
+                            Text(text = "Enter UPC code")
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                        ),
+                        shape = RoundedCornerShape(
+                            topStart = 30.dp,
+                            bottomStart = 30.dp,
+                            topEnd = 0.dp,
+                            bottomEnd = 0.dp
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = transparentColor,
+                            unfocusedIndicatorColor = transparentColor
+                        )
                     )
+                    Button(
+                        onClick = {
+                            val permissionCheckResult =
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA,
+                                )
+                            if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                                val options = ScanOptions()
+                                options.setOrientationLocked(false)
+                                options.setBeepEnabled(true)
+                                options.setDesiredBarcodeFormats("UPC_A")
+                                options.setPrompt("Scan a barcode")
+                                barcodeLauncher.launch(options)
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
+                        },
+                        modifier = Modifier
+                            .height(TextFieldDefaults.MinHeight),
+                        shape = RoundedCornerShape(
+                            topStart = 0.dp,
+                            bottomStart = 0.dp,
+                            topEnd = 30.dp,
+                            bottomEnd = 30.dp
+                        )
+                    ) {
+                        Text("Scan")
+                    }
+                }
             }
         }
     }
