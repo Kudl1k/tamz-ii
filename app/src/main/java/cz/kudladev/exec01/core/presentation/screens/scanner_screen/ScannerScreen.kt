@@ -9,6 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,8 +48,10 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.google.zxing.BarcodeFormat
@@ -91,6 +94,11 @@ fun ScannerScreen(
             onEvent(ScannerScreenEvent.setCodeText(result.contents.dropLast(1)))
         }
     }
+    val options = ScanOptions()
+    options.setOrientationLocked(false)
+    options.setBeepEnabled(true)
+    options.setDesiredBarcodeFormats("UPC_A")
+    options.setPrompt("Scan a barcode")
 
 
     val transparentColor = androidx.compose.ui.graphics.Color.Transparent
@@ -101,6 +109,7 @@ fun ScannerScreen(
     ) {
         if (it) {
             Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
+            barcodeLauncher.launch(options)
         } else {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
@@ -139,10 +148,11 @@ fun ScannerScreen(
 
                 Box(
                     modifier = Modifier
-                        .wrapContentSize(Alignment.Center) // Center content within the Box
-                        .height(100.dp)
+                        .padding(5.dp)
+                        .clip(RoundedCornerShape(5))
+                        .background(if (state.codeText.length == 11) White else transparentColor)
                 ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
+                    Canvas(modifier = modifier.fillMaxWidth().height(200.dp)) {
                         if (state.codeText.length == 11) {
                             val checksum = calculateUPCAChecksum(state.codeText)
                             val fullUPC = state.codeText + checksum
@@ -186,11 +196,7 @@ fun ScannerScreen(
                                     Manifest.permission.CAMERA,
                                 )
                             if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                                val options = ScanOptions()
-                                options.setOrientationLocked(false)
-                                options.setBeepEnabled(true)
-                                options.setDesiredBarcodeFormats("UPC_A")
-                                options.setPrompt("Scan a barcode")
+
                                 barcodeLauncher.launch(options)
                             } else {
                                 permissionLauncher.launch(Manifest.permission.CAMERA)
@@ -234,8 +240,8 @@ fun encodeAsBitmap(str: String?): Bitmap {
 
 
 fun DrawScope.drawUPCABarcode(upc: String) {
-    val startX = 75f
-    val startY = 100f
+    val startX = 50f
+    val startY = 70f
     val barWidth = 10f // updated
     val barHeight = size.height * 0.75f // updated
 

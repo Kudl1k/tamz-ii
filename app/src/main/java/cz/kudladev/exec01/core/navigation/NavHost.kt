@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navigation
+import cz.kudladev.exec01.core.presentation.screens.HomeScreen
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
@@ -31,9 +32,16 @@ fun NavigationHost(
         startDestination = Routes.Root.route
     ) {
         navigation(
-            startDestination = Routes.Scanner.route,
+            startDestination = Routes.Home.route,
             route = Routes.Root.route
         ){
+            composable(
+                route = Routes.Home.route
+            ){
+                HomeScreen(
+                    navController = navHostController
+                )
+            }
             navigation(
                 startDestination = Routes.InvestmentCalc.route,
                 route = Routes.InvestmentNav.route

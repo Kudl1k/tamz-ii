@@ -5,10 +5,13 @@ import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Routes(val route: String, val title: String? = null, val icon: ImageVector? = null) {
+
+    data object Home : Routes(route = "home", title = "TAMZ II - KUD0132", icon = Icons.Default.Home)
 
     data object Root : Routes(route = "root")
 
