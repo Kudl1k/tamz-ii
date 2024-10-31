@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Gamepad
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -22,5 +23,7 @@ sealed class Routes(val route: String, val title: String? = null, val icon: Imag
 
     data object Scanner : Routes(route = "scanner", title = "Scanner", icon = Icons.Default.QrCodeScanner)
     data object API: Routes(route = "api", title = "API", icon = Icons.Default.Api)
+
+    data object Sokoban : Routes(route = "sokoban", title = "Sokoban", icon = Icons.Default.Gamepad)
 
 }

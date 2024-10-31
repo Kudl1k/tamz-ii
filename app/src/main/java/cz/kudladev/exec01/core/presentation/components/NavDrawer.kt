@@ -27,8 +27,9 @@ fun NavDrawer(
     val routes = listOf(
         Routes.InvestmentNav,
         Routes.Scanner,
+        Routes.Sokoban,
         Routes.Weather,
-        Routes.API,
+        Routes.API
     )
 
     ModalNavigationDrawer(

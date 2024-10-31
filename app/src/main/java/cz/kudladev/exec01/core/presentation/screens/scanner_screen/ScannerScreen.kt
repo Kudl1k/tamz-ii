@@ -1,15 +1,23 @@
 package cz.kudladev.exec01.core.presentation.screens.scanner_screen
 
 import android.Manifest
+import android.content.ContentValues
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,9 +27,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.insert
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
@@ -47,12 +57,14 @@ import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.core.text.color
 import androidx.navigation.NavController
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
@@ -63,7 +75,9 @@ import cz.kudladev.exec01.core.presentation.components.BottomAppNavBar
 import cz.kudladev.exec01.core.presentation.components.NavDrawer
 import cz.kudladev.exec01.core.presentation.components.TopAppBarWithDrawer
 import kotlinx.coroutines.launch
+import kotlin.text.clear
 import kotlin.times
+
 
 
 @Composable
@@ -151,17 +165,47 @@ fun ScannerScreen(
                         .padding(5.dp)
                         .clip(RoundedCornerShape(5))
                         .background(if (state.codeText.length == 11) White else transparentColor)
+                        .pointerInput(Unit){
+                            detectTapGestures(
+                                onLongPress = {
+                                    if (state.codeText.length == 11) {
+                                        val checksum = calculateUPCAChecksum(state.codeText)
+                                        val fullUPC = state.codeText + checksum
+                                        val bitmap = Bitmap.createBitmap(
+                                            (size.width * density).toInt(),
+                                            (size.height * density).toInt(),
+                                            Bitmap.Config.ARGB_8888
+                                        )
+                                        val canvas = android.graphics.Canvas(bitmap)
+                                        drawUPCABarcode(fullUPC, canvas,context) // Assuming you have a drawUPCABarcode function for android.graphics.Canvas
+
+                                        val savedUri = saveBitmapToPhotos(context, bitmap, "barcode_${System.currentTimeMillis()}.png")
+                                        if (savedUri != null) {
+                                            Toast.makeText(context, "Barcode saved to photos", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(context, "Error saving barcode", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+                            )
+                        }
                 ) {
-                    Canvas(modifier = modifier.fillMaxWidth().height(200.dp)) {
+
+                    Canvas(modifier = modifier
+                        .height(200.dp)
+                        .width(400.dp)) {
                         if (state.codeText.length == 11) {
                             val checksum = calculateUPCAChecksum(state.codeText)
                             val fullUPC = state.codeText + checksum
                             drawUPCABarcode(fullUPC)
+
                         }
                     }
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextField(
@@ -256,6 +300,28 @@ fun DrawScope.drawUPCABarcode(upc: String) {
         )
     }
 }
+fun drawUPCABarcode(upc: String, canvas: Canvas,context: Context) {
+
+    val density = context.resources.displayMetrics.density // Get density
+    val startX = 50f * density // Adjust startX based on density
+    val startY = 70f * density
+    val barWidth = 20f * density // Adjust barWidth based on density
+    val barHeight = canvas.height * 0.75f
+
+    val upcBinary = getUPCABinary(upc)
+    val paint = android.graphics.Paint()
+
+    upcBinary.forEachIndexed { index, char ->
+        paint.color = if (char == '1') Color.BLACK else Color.WHITE
+        canvas.drawRect(
+            startX + index * barWidth,
+            startY,
+            startX + (index + 1) * barWidth,
+            startY + barHeight,
+            paint
+        )
+    }
+}
 
 fun calculateUPCAChecksum(upc: String): Char {
     val oddSum = upc.filterIndexed { index, _ -> index % 2 == 0 }.sumBy { it.toString().toInt() }
@@ -292,4 +358,45 @@ fun getUPCABinary(upc: String): String {
     return leftGuard + leftBinary + centerGuard + rightBinary + rightGuard
 }
 
+
+fun saveBitmapToPhotos(context: Context, bitmap: Bitmap, displayName: String): Uri? {
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, displayName)
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+        }
+    }
+
+    val contentResolver = context.contentResolver
+    val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+    } else {
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    }
+
+    var uri: Uri? = null
+    try {
+        uri = contentResolver.insert(collection, contentValues)
+        uri?.let {
+            val outputStream = contentResolver.openOutputStream(it)
+            if (outputStream != null) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            }
+            outputStream?.close()
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.clear()
+            contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            contentResolver.update(uri!!, contentValues, null, null)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        // Handle the exception, e.g., display an error message
+    }
+
+    return uri
+}
 

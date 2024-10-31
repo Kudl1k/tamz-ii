@@ -18,6 +18,7 @@ import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenViewMod
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculator
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreenViewModel
+import cz.kudladev.exec01.core.presentation.screens.sokoban.SokoView
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -86,6 +87,9 @@ fun NavigationHost(
                 val state by viewModel.state.collectAsState()
                 val onEvent = viewModel::onEvent
                 WeatherScreen(navController = navHostController, state = state, onEvent = onEvent)
+            }
+            composable(route = Routes.Sokoban.route) {
+                SokoView(navHostController)
             }
         }
 
