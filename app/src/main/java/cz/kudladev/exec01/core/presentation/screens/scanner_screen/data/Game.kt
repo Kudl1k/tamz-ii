@@ -72,6 +72,7 @@ class Game {
         player = Player(startingLocation.first, startingLocation.second)
         currentLevel.value = levels[0]
         points.value = 0
+        win.value = false
         CoroutineScope(Dispatchers.Main).launch {
             maxPoints.value = getMaxPoints()
         }

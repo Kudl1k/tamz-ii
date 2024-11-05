@@ -208,10 +208,9 @@ fun SokoView(navController: NavController) {
                         )
                     }
                 }
-                Column(
+                Box(
                     modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    contentAlignment = Alignment.Center
                 ){
                     if(game.win.value){
                         Text(
@@ -219,6 +218,47 @@ fun SokoView(navController: NavController) {
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 48.sp
                         )
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Arrows(
+                                tilt = 0f,
+                                onClick = {
+                                    game.checkMovement(2)
+                                },
+                                modifier = Modifier.size(75.dp)
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Arrows(
+                                    tilt = -90f,
+                                    onClick = {
+                                        game.checkMovement(1)
+                                    },
+                                    modifier = Modifier.size(75.dp)
+                                )
+                                Spacer(modifier = Modifier.size(75.dp))
+                                Arrows(
+                                    tilt = 90f,
+                                    onClick = {
+                                        game.checkMovement(0)
+                                    },
+                                    modifier = Modifier.size(75.dp)
+                                )
+                            }
+                            Arrows(
+                                tilt = 180f,
+                                onClick = {
+                                    game.checkMovement(3)
+                                },
+                                modifier = Modifier.size(75.dp)
+                            )
+                        }
                     }
                 }
             }
