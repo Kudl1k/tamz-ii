@@ -25,5 +25,7 @@ sealed class Routes(val route: String, val title: String? = null, val icon: Imag
     data object API: Routes(route = "api", title = "API", icon = Icons.Default.Api)
 
     data object Sokoban : Routes(route = "sokoban", title = "Sokoban", icon = Icons.Default.Gamepad)
+    data object SokobanMain : Routes(route = "sokoban_main", title = "Level select", icon = Icons.Default.Gamepad)
+    data object SokobanGame : Routes(route = "sokoban_game", title = "Game", icon = Icons.Default.Gamepad)
 
 }

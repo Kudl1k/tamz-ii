@@ -2,20 +2,19 @@ package cz.kudladev.exec01.core.presentation.screens.scanner_screen.data
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import cz.kudladev.exec01.core.presentation.screens.sokoban.data.Level
+import cz.kudladev.exec01.core.presentation.screens.sokoban.data.Player
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-class Game {
+class Game(private val level: Level) {
 
-    var levels: MutableList<IntArray> = mutableListOf(
-        level1
-    )
     var levelWidth: Int = 10
     var levelHeight: Int = 10
-    val currentLevel = mutableStateOf(levels[0])
+    val currentLevel = mutableStateOf(level.level)
     var points = mutableStateOf(0)
     var maxPoints = mutableStateOf(0)
     var player: Player? = null
@@ -68,9 +67,9 @@ class Game {
     }
 
     fun restart(){
-        val startingLocation = getPlayerStartingLocation(levels[0])
+        val startingLocation = getPlayerStartingLocation(level.level)
         player = Player(startingLocation.first, startingLocation.second)
-        currentLevel.value = levels[0]
+        currentLevel.value = level.level
         points.value = 0
         win.value = false
         CoroutineScope(Dispatchers.Main).launch {

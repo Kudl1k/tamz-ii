@@ -1,4 +1,4 @@
-package cz.kudladev.exec01.core.presentation.screens.scanner_screen.data
+package cz.kudladev.exec01.core.presentation.screens.sokoban.data
 
 import androidx.compose.runtime.remember
 

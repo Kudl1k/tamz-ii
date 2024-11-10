@@ -5,12 +5,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import cz.kudladev.exec01.core.data.api.GeoApi
+import cz.kudladev.exec01.core.data.api.LevelsAPI
 import cz.kudladev.exec01.core.data.api.StoreApi
 import cz.kudladev.exec01.core.data.api.WeatherApi
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreenViewModel
+import cz.kudladev.exec01.core.presentation.screens.sokoban.SokobanViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -53,6 +55,14 @@ val coreModule = module {
             .create(GeoApi::class.java)
     }
 
+    single {
+        Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(LevelsAPI.BASE_URL)
+            .build()
+            .create(LevelsAPI::class.java)
+    }
+
     single<DataStore<Preferences>> {
         androidContext().dataStore
     }
@@ -82,6 +92,12 @@ val coreModule = module {
         ){
             androidContext()
         }
+    }
+
+    viewModel{
+        SokobanViewModel(
+            levelsAPI = get()
+        )
     }
 
 

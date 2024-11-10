@@ -19,6 +19,8 @@ import cz.kudladev.exec01.core.presentation.screens.investment_calculator.Invest
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculator
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.sokoban.SokoView
+import cz.kudladev.exec01.core.presentation.screens.sokoban.SokobanViewModel
+import cz.kudladev.exec01.core.presentation.screens.sokoban.screen.SokobanMainScreen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -28,6 +30,10 @@ fun NavigationHost(
     val investmentViewmodel: InvestmentCalculatorViewModel = koinViewModel()
     val investmentState by investmentViewmodel.state.collectAsState()
     val investmentOnEvent = investmentViewmodel::onEvent
+
+    val sokoViewModel: SokobanViewModel = koinViewModel()
+    val sokoState by sokoViewModel.state.collectAsState()
+    val sokoOnEvent = sokoViewModel::onEvent
     NavHost(
         navController = navHostController,
         startDestination = Routes.Root.route
@@ -88,8 +94,24 @@ fun NavigationHost(
                 val onEvent = viewModel::onEvent
                 WeatherScreen(navController = navHostController, state = state, onEvent = onEvent)
             }
-            composable(route = Routes.Sokoban.route) {
-                SokoView(navHostController)
+            navigation(
+                startDestination = Routes.SokobanMain.route,
+                route = Routes.Sokoban.route
+            ){
+                composable(route = Routes.SokobanMain.route) {
+                    SokobanMainScreen(
+                        navController = navHostController,
+                        state = sokoState,
+                        onEvent = sokoOnEvent
+                    )
+                }
+                composable(route = Routes.SokobanGame.route) {
+                    SokoView(
+                        navController = navHostController,
+                        state = sokoState,
+                        onEvent = sokoOnEvent
+                    )
+                }
             }
         }
 

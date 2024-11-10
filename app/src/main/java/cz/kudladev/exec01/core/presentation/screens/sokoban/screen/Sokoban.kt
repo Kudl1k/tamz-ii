@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,12 +63,16 @@ import cz.kudladev.exec01.R
 import cz.kudladev.exec01.core.presentation.components.NavDrawer
 import cz.kudladev.exec01.core.presentation.components.TopAppBarWithDrawer
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.data.Game
-import cz.kudladev.exec01.core.presentation.screens.scanner_screen.data.level1
+import cz.kudladev.exec01.core.presentation.screens.sokoban.screen.components.Arrows
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @Composable
-fun SokoView(navController: NavController) {
+fun SokoView(
+    navController: NavController,
+    state: SokobanState,
+    onEvent: (SokobanEvent) -> Unit
+) {
     var size by remember { mutableStateOf(IntSize.Zero) }
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -86,9 +91,7 @@ fun SokoView(navController: NavController) {
         )
     }
 
-    val game by remember { mutableStateOf(Game()) }
-
-
+    val game = remember { mutableStateOf(Game(state.selectedLevel)) }
 
     NavDrawer(
         navController = navController,
@@ -110,12 +113,15 @@ fun SokoView(navController: NavController) {
             }
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(it).verticalScroll(rememberScrollState())
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
-                ){
+                ) {
                     Canvas(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -124,28 +130,26 @@ fun SokoView(navController: NavController) {
                                 this.detectSwipe(
                                     onSwipeRight = {
                                         Log.d("Swipe", "Swipe Right")
-                                        game.checkMovement(0)
+                                        game.value.checkMovement(0)
                                     },
                                     onSwipeLeft = {
                                         Log.d("Swipe", "Swipe Left")
-                                        game.checkMovement(1)
+                                        game.value.checkMovement(1)
                                     },
                                     onSwipeUp = {
                                         Log.d("Swipe", "Swipe Up")
-                                        game.checkMovement(2)
+                                        game.value.checkMovement(2)
                                     },
                                     onSwipeDown = {
                                         Log.d("Swipe", "Swipe Down")
-                                        game.checkMovement(3)
+                                        game.value.checkMovement(3)
                                     }
                                 )
                             }
-
-
                     ) {
                         size = IntSize(this.size.width.toInt(), this.size.height.toInt())
-                        val width = size.width.toFloat() / game.levelWidth
-                        val height = size.height.toFloat() / game.levelHeight
+                        val width = size.width.toFloat() / game.value.levelWidth
+                        val height = size.height.toFloat() / game.value.levelHeight
 
                         val scaleFactor = if (size.width > size.height) {
                             height / bmp[0]?.height?.toFloat()!!
@@ -153,9 +157,9 @@ fun SokoView(navController: NavController) {
                             minOf(width, height) / bmp[0]?.width?.toFloat()!!
                         }
 
-                        for (y in 0 until game.levelHeight) {
-                            for (x in 0 until game.levelWidth) {
-                                val currentObject = game.currentLevel.value[y * game.levelWidth + x]
+                        for (y in 0 until game.value.levelHeight) {
+                            for (x in 0 until game.value.levelWidth) {
+                                val currentObject = game.value.currentLevel.value[y * game.value.levelWidth + x]
                                 if (currentObject in bmp.indices) {
                                     bmp[currentObject]?.let { bitmap ->
                                         drawIntoCanvas { canvas ->
@@ -184,17 +188,19 @@ fun SokoView(navController: NavController) {
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Points: ${game.points.value}/${game.maxPoints.value}",
+                        text = "Points: ${game.value.points.value}/${game.value.maxPoints.value}",
                         modifier = Modifier.wrapContentSize()
                     )
                     Button(
                         onClick = {
-                            game.restart()
+                            game.value.restart()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Red,
@@ -211,8 +217,8 @@ fun SokoView(navController: NavController) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ){
-                    if(game.win.value){
+                ) {
+                    if (game.value.win.value) {
                         Text(
                             text = "You win!",
                             fontWeight = FontWeight.ExtraBold,
@@ -227,7 +233,7 @@ fun SokoView(navController: NavController) {
                             Arrows(
                                 tilt = 0f,
                                 onClick = {
-                                    game.checkMovement(2)
+                                    game.value.checkMovement(2)
                                 },
                                 modifier = Modifier.size(75.dp)
                             )
@@ -238,7 +244,7 @@ fun SokoView(navController: NavController) {
                                 Arrows(
                                     tilt = -90f,
                                     onClick = {
-                                        game.checkMovement(1)
+                                        game.value.checkMovement(1)
                                     },
                                     modifier = Modifier.size(75.dp)
                                 )
@@ -246,7 +252,7 @@ fun SokoView(navController: NavController) {
                                 Arrows(
                                     tilt = 90f,
                                     onClick = {
-                                        game.checkMovement(0)
+                                        game.value.checkMovement(0)
                                     },
                                     modifier = Modifier.size(75.dp)
                                 )
@@ -254,7 +260,7 @@ fun SokoView(navController: NavController) {
                             Arrows(
                                 tilt = 180f,
                                 onClick = {
-                                    game.checkMovement(3)
+                                    game.value.checkMovement(3)
                                 },
                                 modifier = Modifier.size(75.dp)
                             )

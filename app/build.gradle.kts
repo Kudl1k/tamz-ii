@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.devtools.ksp")
+
 }
 
 android {
@@ -80,6 +82,8 @@ dependencies {
     implementation(libs.bundles.retrofit)
 
     implementation(libs.bundles.coil)
+
+    //implementation(libs.bundles.room)
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
