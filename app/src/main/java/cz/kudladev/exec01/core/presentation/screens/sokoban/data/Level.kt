@@ -3,10 +3,14 @@ package cz.kudladev.exec01.core.presentation.screens.sokoban.data
 
 data class Level(
     val id: Int,
+    val baseLevel: IntArray,
     var level: IntArray,
     val boxes: Int,
     val width: Int,
-    val height: Int
+    val height: Int,
+    val currentMoves: Int,
+    val bestMoves: Int,
+    val inProgress: Boolean
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cz.kudladev.exec01.core.presentation.screens.sokoban.data.Level
@@ -38,11 +39,26 @@ fun LevelLazyItem(
             LevelPreview(
                 level = level
             )
-            Text(
-                text = "Level ${level.id}",
-                modifier = Modifier.padding(16.dp),
-                fontSize = 20.sp
-            )
+            Column(
+                modifier = Modifier.padding(start = 16.dp)
+            ) {
+                Text(
+                    text = "Level ${level.id}",
+                    fontSize = 20.sp
+                )
+                if (level.inProgress){
+                    Text(
+                        text = "In Progress",
+                        color = Color.Red,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = "Current moves: ${level.currentMoves}",
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
             Column(
                 modifier = Modifier.fillMaxWidth()
                     .padding(end = 16.dp),
@@ -55,6 +71,10 @@ fun LevelLazyItem(
                 )
                 Text(
                     text = "Size: ${level.width}x${level.height}",
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "Best moves: ${level.bestMoves}",
                     fontSize = 16.sp
                 )
             }

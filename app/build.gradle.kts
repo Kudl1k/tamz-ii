@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
-
 }
 
 android {
@@ -83,7 +82,6 @@ dependencies {
 
     implementation(libs.bundles.coil)
 
-    //implementation(libs.bundles.room)
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
@@ -93,5 +91,17 @@ dependencies {
 
     implementation("androidx.compose.animation:animation-core:1.7.3")
     implementation("androidx.compose.animation:animation-graphics:1.7.3")
+
+    val room_version = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+
+    // To use Kotlin Symbol Processing (KSP)
+    ksp("androidx.room:room-compiler:$room_version")
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation("androidx.room:room-ktx:$room_version")
+
 
 }

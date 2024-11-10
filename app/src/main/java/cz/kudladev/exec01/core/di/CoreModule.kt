@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.room.Room
 import cz.kudladev.exec01.core.data.api.GeoApi
 import cz.kudladev.exec01.core.data.api.LevelsAPI
 import cz.kudladev.exec01.core.data.api.StoreApi
@@ -13,6 +14,7 @@ import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenViewMod
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.sokoban.SokobanViewModel
+import cz.kudladev.exec01.core.presentation.screens.sokoban.db.GameDatabase
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -67,6 +69,17 @@ val coreModule = module {
         androidContext().dataStore
     }
 
+    single {
+        Room.databaseBuilder(
+            context = androidContext(),
+            GameDatabase::class.java, "game_database"
+        ).build()
+    }
+
+    single {
+        get<GameDatabase>().levelDao()
+    }
+
     single<Context>{
         androidApplication()
     }
@@ -96,7 +109,8 @@ val coreModule = module {
 
     viewModel{
         SokobanViewModel(
-            levelsAPI = get()
+            levelsAPI = get(),
+            levelDao = get()
         )
     }
 

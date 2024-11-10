@@ -20,6 +20,7 @@ import cz.kudladev.exec01.core.presentation.screens.investment_calculator.Invest
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.sokoban.SokoView
 import cz.kudladev.exec01.core.presentation.screens.sokoban.SokobanViewModel
+import cz.kudladev.exec01.core.presentation.screens.sokoban.screen.LevelEditor
 import cz.kudladev.exec01.core.presentation.screens.sokoban.screen.SokobanMainScreen
 import org.koin.androidx.compose.koinViewModel
 
@@ -107,6 +108,13 @@ fun NavigationHost(
                 }
                 composable(route = Routes.SokobanGame.route) {
                     SokoView(
+                        navController = navHostController,
+                        state = sokoState,
+                        onEvent = sokoOnEvent
+                    )
+                }
+                composable(route = Routes.SokobanEdit.route) {
+                    LevelEditor(
                         navController = navHostController,
                         state = sokoState,
                         onEvent = sokoOnEvent

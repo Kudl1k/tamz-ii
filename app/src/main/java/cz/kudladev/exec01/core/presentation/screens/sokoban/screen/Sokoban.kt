@@ -93,6 +93,19 @@ fun SokoView(
 
     val game = remember { mutableStateOf(Game(state.selectedLevel)) }
 
+    LaunchedEffect(game.value.currentLevel.value) {
+        Log.d("SokobanView", "Level changed to ${game.value.currentLevel.value.contentToString()}")
+        Log.d("SokobanView", "Current moves: ${game.value.currentMoves.value}")
+        if (game.value.win.value) {
+            onEvent(SokobanEvent.Win(game.value.currentLevel.value, game.value.currentMoves.value))
+        } else {
+            Log.d("SokobanView", "Saving progress")
+            onEvent(SokobanEvent.SaveProgress(game.value.currentLevel.value, game.value.currentMoves.value))
+        }
+    }
+
+
+
     NavDrawer(
         navController = navController,
         drawerState = drawerState
@@ -156,6 +169,7 @@ fun SokoView(
                         } else {
                             minOf(width, height) / bmp[0]?.width?.toFloat()!!
                         }
+
 
                         for (y in 0 until game.value.levelHeight) {
                             for (x in 0 until game.value.levelWidth) {

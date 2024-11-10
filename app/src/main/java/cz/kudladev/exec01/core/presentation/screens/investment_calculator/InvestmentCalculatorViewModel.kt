@@ -182,39 +182,44 @@ class InvestmentCalculatorViewModel(
         }
     }
 
-    private fun loadHistory(){
-        Log.d("InputScreenViewModel","Loading history")
+    private fun loadHistory() {
+        Log.d("InputScreenViewModel", "Loading history")
         try {
             val sharedPreferences = context.getSharedPreferences("history", Context.MODE_PRIVATE)
             val gson = Gson()
             val json = sharedPreferences.getString("investment_calc_states", null)
-            val type = object : TypeToken<List<InvestmentCalcHistoryStates>>() {}.type
-            val retrievedList: List<InvestmentCalcHistoryStates> = gson.fromJson(json, type)
+            if (json != null) {
+                val type = object : TypeToken<List<InvestmentCalcHistoryStates>>() {}.type
+                val retrievedList: List<InvestmentCalcHistoryStates> = gson.fromJson(json, type) ?: emptyList()
 
+                Log.d("InputScreenViewModel", "Loaded history: $retrievedList")
 
-            Log.d("InputScreenViewModel","Loaded history: $retrievedList")
-
-            if (retrievedList.isNotEmpty()){
-                _state.value = _state.value.copy(
-                    history = retrievedList,
-                    loaded = true,
-                    resultedMoney = retrievedList.last().resultedMoney,
-                    resultedInterestMoney = retrievedList.last().resultedInterestMoney,
-                    startbalance = retrievedList.last().startbalance,
-                    interest = retrievedList.last().interest,
-                    length = retrievedList.last().length,
-                    pieChartToggle = retrievedList.last().pieChartToggle,
-                    barChartToggle = retrievedList.last().barChartToggle,
-                    repeatableInvestment = retrievedList.last().repeatableInvestment,
-                    repeatableInvestmentAmount = retrievedList.last().repeatableInvestmentAmount
-                )
+                if (retrievedList.isNotEmpty()) {
+                    _state.value = _state.value.copy(
+                        history = retrievedList,
+                        loaded = true,
+                        resultedMoney = retrievedList.last().resultedMoney,
+                        resultedInterestMoney = retrievedList.last().resultedInterestMoney,
+                        startbalance = retrievedList.last().startbalance,
+                        interest = retrievedList.last().interest,
+                        length = retrievedList.last().length,
+                        pieChartToggle = retrievedList.last().pieChartToggle,
+                        barChartToggle = retrievedList.last().barChartToggle,
+                        repeatableInvestment = retrievedList.last().repeatableInvestment,
+                        repeatableInvestmentAmount = retrievedList.last().repeatableInvestmentAmount
+                    )
+                } else {
+                    _state.value = _state.value.copy(
+                        loaded = true
+                    )
+                }
             } else {
                 _state.value = _state.value.copy(
                     loaded = true
                 )
             }
-        } catch (e: Exception){
-            Log.e("InputScreenViewModel","Error loading history",e)
+        } catch (e: Exception) {
+            Log.e("InputScreenViewModel", "Error loading history", e)
         }
     }
 

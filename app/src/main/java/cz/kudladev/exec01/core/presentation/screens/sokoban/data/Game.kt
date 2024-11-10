@@ -15,6 +15,8 @@ class Game(private val level: Level) {
     var levelWidth: Int = 10
     var levelHeight: Int = 10
     val currentLevel = mutableStateOf(level.level)
+    var currentMoves = mutableStateOf(level.currentMoves)
+    val baseLevel = level.baseLevel
     var points = mutableStateOf(0)
     var maxPoints = mutableStateOf(0)
     var player: Player? = null
@@ -23,9 +25,9 @@ class Game(private val level: Level) {
     init {
         var startingLocation = getPlayerStartingLocation(currentLevel.value)
         player = Player(startingLocation.first, startingLocation.second)
-        CoroutineScope(Dispatchers.Main).launch {
-            maxPoints.value = getMaxPoints()
-        }
+        maxPoints.value = getMaxPoints()
+        points.value = getPoints()
+        Log.d("Game", "Game initialized")
     }
 
 
@@ -67,11 +69,12 @@ class Game(private val level: Level) {
     }
 
     fun restart(){
-        val startingLocation = getPlayerStartingLocation(level.level)
+        val startingLocation = getPlayerStartingLocation(baseLevel)
         player = Player(startingLocation.first, startingLocation.second)
-        currentLevel.value = level.level
+        currentLevel.value = baseLevel
         points.value = 0
         win.value = false
+        currentMoves.value = 0
         CoroutineScope(Dispatchers.Main).launch {
             maxPoints.value = getMaxPoints()
         }
@@ -84,6 +87,7 @@ class Game(private val level: Level) {
 
         when (currentLevel.value[nextPositionIndex]) {
             0 -> {
+                currentMoves.value += 1
                 updateLevel(nextX, nextY)
                 Log.d("Game", "Moved to empty space")
             }
@@ -95,10 +99,12 @@ class Game(private val level: Level) {
                 if (nextBoxX in 0 until levelWidth && nextBoxY in 0 until levelHeight) {
                     when (currentLevel.value[nextBoxPositionIndex]) {
                         0 -> {
+                            currentMoves.value += 1
                             updateLevel(nextX, nextY, nextBoxX, nextBoxY, currentLevel.value[nextPositionIndex])
                             Log.d("Game", "Moved box to empty space")
                         }
                         3 -> {
+                            currentMoves.value += 1
                             updateLevel(nextX, nextY, nextBoxX, nextBoxY, 5)
                             Log.d("Game", "Moved box to goal")
                         }
@@ -187,8 +193,18 @@ class Game(private val level: Level) {
 
     private fun getMaxPoints(): Int {
         var points = 0
+        for (i in baseLevel.indices) {
+            if (baseLevel[i] == 3) {
+                points++
+            }
+        }
+        return points
+    }
+
+    private fun getPoints(): Int {
+        var points = 0
         for (i in currentLevel.value.indices) {
-            if (currentLevel.value[i] == 3) {
+            if (currentLevel.value[i] == 5) {
                 points++
             }
         }
