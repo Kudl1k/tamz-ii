@@ -40,8 +40,11 @@ class SokobanViewModel(
                 val dbLevels = withContext(Dispatchers.IO) {
                     levelDao.getLevels().map { it.toLevel() }
                 }
+                Log.d("SokobanViewModel", "DB levels: $dbLevels")
                 val apiLevels = levelsAPI.getLevels()
+                Log.d("SokobanViewModel", "API levels: $apiLevels")
                 if (apiLevels.size != dbLevels.size) {
+                    Log.d("SokobanViewModel", "Inserting levels from API")
                     withContext(Dispatchers.IO) {
                         levelDao.insertLevels(apiLevels.map { it.toLevelDTO() })
                     }
@@ -50,6 +53,7 @@ class SokobanViewModel(
                         selectedLevel = apiLevels[0],
                     )
                 } else {
+                    Log.d("SokobanViewModel", "Using levels from DB")
                     _state.value = _state.value.copy(
                         levels = dbLevels,
                         selectedLevel = dbLevels[0],
@@ -57,6 +61,14 @@ class SokobanViewModel(
                 }
             } catch (e: ConnectException) {
                 Log.e("SokobanViewModel", "No internet connection")
+                val dbLevels = withContext(Dispatchers.IO) {
+                    levelDao.getLevels().map { it.toLevel() }
+                }
+                Log.d("SokobanViewModel", "Using levels from DB")
+                _state.value = _state.value.copy(
+                    levels = dbLevels,
+                    selectedLevel = dbLevels[0],
+                )
             }
         }
     }
@@ -85,7 +97,7 @@ class SokobanViewModel(
                     state.value.selectedLevel.width,
                     event.currentMoves,
                     state.value.selectedLevel.bestMoves,
-                    true
+                    event.currentMoves != 0
                 )
                 viewModelScope.launch {
                     withContext(Dispatchers.IO) {
@@ -96,6 +108,7 @@ class SokobanViewModel(
                     selectedLevel = updatedLevel,
                     levels = state.value.levels.map { if (it.id == updatedLevel.id) updatedLevel else it }
                 )
+                Log.d("SokobanViewModel", "Saved progress ${event.currentMoves}")
             }
             is SokobanEvent.Win -> {
                 viewModelScope.launch {
@@ -119,6 +132,10 @@ class SokobanViewModel(
                             }
                         }
                     }
+                    _state.value = _state.value.copy(
+                        selectedLevel = updatedLevel,
+                        levels = state.value.levels.map { if (it.id == updatedLevel.id) updatedLevel else it }
+                    )
                 }
 
 
@@ -126,24 +143,130 @@ class SokobanViewModel(
             }
 
             SokobanEvent.DecreaseHeight -> {
+                val currentLevel = state.value.editorLevel.value.level
+                val height = state.value.editorLevel.value.height
+                val newLevel = IntArray(currentLevel.size - state.value.editorLevel.value.width) { index ->
+                    if (index < currentLevel.size - state.value.editorLevel.value.width) {
+                        currentLevel[index]
+                    } else {
+                        0
+                    }
+                }
+
                 _state.value = _state.value.copy(
-                    editorLevel = mutableStateOf(state.value.editorLevel.value.copy(height = state.value.editorLevel.value.height - 1))
+                    editorLevel = mutableStateOf(
+                        state.value.editorLevel.value.copy(
+                            height = state.value.editorLevel.value.height - 1,
+                            level = newLevel
+                        )
+                    )
                 )
             }
             SokobanEvent.DecreaseWidth -> {
+                val currentLevel = state.value.editorLevel.value.level
+                val width = state.value.editorLevel.value.width
+                val height = state.value.editorLevel.value.height
+
+                // Calculate the new level size
+                val newLevelSize = (width - 1) * height
+
+                val newLevel = IntArray(newLevelSize) { index ->
+                    val row = index / (width - 1) // Calculate the row index
+                    val col = index % (width - 1) // Calculate the column index
+
+                    // Check if the element should be copied from the current level
+                    if (col < width) {
+                        currentLevel[row * width + col]
+                    } else {
+                        0 // Insert 0 for new values
+                    }
+                }
+
                 _state.value = _state.value.copy(
-                    editorLevel = mutableStateOf(state.value.editorLevel.value.copy(width = state.value.editorLevel.value.width - 1))
+                    editorLevel = mutableStateOf(
+                        state.value.editorLevel.value.copy(
+                            width = state.value.editorLevel.value.width - 1,
+                            level = newLevel
+                        )
+                    )
                 )
             }
             SokobanEvent.IncreaseHeight -> {
+                val currentLevel = state.value.editorLevel.value.level
+                val height = state.value.editorLevel.value.height
+                val newLevel = IntArray(currentLevel.size + state.value.editorLevel.value.width) { index ->
+                    if (index < currentLevel.size) {
+                        currentLevel[index]
+                    } else {
+                        0
+                    }
+                }
+
                 _state.value = _state.value.copy(
-                    editorLevel = mutableStateOf(state.value.editorLevel.value.copy(height = state.value.editorLevel.value.height + 1))
+                    editorLevel = mutableStateOf(
+                        state.value.editorLevel.value.copy(
+                            height = state.value.editorLevel.value.height + 1,
+                            level = newLevel
+                        )
+                    )
                 )
             }
             SokobanEvent.IncreaseWidth -> {
+                val currentLevel = state.value.editorLevel.value.level
+                val width = state.value.editorLevel.value.width
+                val height = state.value.editorLevel.value.height
+
+                // Calculate the new level size
+                val newLevelSize = (width + 1) * height
+
+                val newLevel = IntArray(newLevelSize) { index ->
+                    val row = index / (width + 1) // Calculate the row index
+                    val col = index % (width + 1) // Calculate the column index
+
+                    // Check if the element should be copied from the current level
+                    if (col < width) {
+                        currentLevel[row * width + col]
+                    } else {
+                        0 // Insert 0 for new values
+                    }
+                }
+
                 _state.value = _state.value.copy(
-                    editorLevel = mutableStateOf(state.value.editorLevel.value.copy(width = state.value.editorLevel.value.width + 1))
+                    editorLevel = mutableStateOf(
+                        state.value.editorLevel.value.copy(
+                            width = state.value.editorLevel.value.width + 1,
+                            level = newLevel
+                        )
+                    )
                 )
+            }
+
+            is SokobanEvent.UpdateEditLevel -> {
+                _state.value.editorLevel.value = _state.value.editorLevel.value.copy(
+                    level = event.level
+                )
+            }
+
+            SokobanEvent.SaveNewLevel -> {
+                val newLevel = Level(
+                    state.value.levels.size + 1,
+                    state.value.editorLevel.value.level,
+                    state.value.editorLevel.value.level,
+                    state.value.editorLevel.value.boxes,
+                    state.value.editorLevel.value.height,
+                    state.value.editorLevel.value.width,
+                    0,
+                    0,
+                    false
+                )
+                viewModelScope.launch {
+                    withContext(Dispatchers.IO) {
+                        levelDao.insertLevel(newLevel.toLevelDTO())
+                    }
+                    _state.value = _state.value.copy(
+                        levels = state.value.levels + newLevel
+                    )
+                }
             }
         }
     }

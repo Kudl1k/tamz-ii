@@ -1,5 +1,6 @@
 package cz.kudladev.exec01.core.presentation.screens.sokoban.screen
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -99,6 +100,7 @@ fun SokobanMainScreen(
                     ) {
                         items(state.levels) {
                             LevelLazyItem(level = it) { levelId ->
+                                Log.d("SokobanMainScreen", "Selected level $levelId")
                                 onEvent(SokobanEvent.SelectLevel(levelId))
                                 navController.navigate(Routes.SokobanGame.route)
                             }

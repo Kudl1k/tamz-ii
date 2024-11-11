@@ -141,35 +141,16 @@ fun SokoView(
                             .aspectRatio(1f)
                             .pointerInput(Unit) {
                                 this.detectSwipe(
-                                    onSwipeRight = {
-                                        Log.d("Swipe", "Swipe Right")
-                                        game.value.checkMovement(0)
-                                    },
-                                    onSwipeLeft = {
-                                        Log.d("Swipe", "Swipe Left")
-                                        game.value.checkMovement(1)
-                                    },
-                                    onSwipeUp = {
-                                        Log.d("Swipe", "Swipe Up")
-                                        game.value.checkMovement(2)
-                                    },
-                                    onSwipeDown = {
-                                        Log.d("Swipe", "Swipe Down")
-                                        game.value.checkMovement(3)
-                                    }
+                                    onSwipeRight = { game.value.checkMovement(0) },
+                                    onSwipeLeft = { game.value.checkMovement(1) },
+                                    onSwipeUp = { game.value.checkMovement(2) },
+                                    onSwipeDown = { game.value.checkMovement(3) }
                                 )
                             }
                     ) {
                         size = IntSize(this.size.width.toInt(), this.size.height.toInt())
                         val width = size.width.toFloat() / game.value.levelWidth
                         val height = size.height.toFloat() / game.value.levelHeight
-
-                        val scaleFactor = if (size.width > size.height) {
-                            height / bmp[0]?.height?.toFloat()!!
-                        } else {
-                            minOf(width, height) / bmp[0]?.width?.toFloat()!!
-                        }
-
 
                         for (y in 0 until game.value.levelHeight) {
                             for (x in 0 until game.value.levelWidth) {
@@ -178,12 +159,9 @@ fun SokoView(
                                     bmp[currentObject]?.let { bitmap ->
                                         drawIntoCanvas { canvas ->
                                             val dstOffset = Offset(x * width, y * height)
-                                            val dstSize = Size(width, height)
-
-                                            // Scale the bitmap using the scaleFactor
                                             val scaledBitmap = bitmap.asAndroidBitmap().scale(
-                                                (bitmap.width * scaleFactor).toInt(),
-                                                (bitmap.height * scaleFactor).toInt(),
+                                                width.toInt(),
+                                                height.toInt(),
                                                 true
                                             ).asImageBitmap()
 

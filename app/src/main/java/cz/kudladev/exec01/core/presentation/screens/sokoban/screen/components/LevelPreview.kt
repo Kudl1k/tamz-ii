@@ -46,17 +46,11 @@ fun LevelPreview(
     Canvas(
         modifier = modifier
             .padding(5.dp)
-            .aspectRatio(1f)
+            .fillMaxWidth()
+            .aspectRatio(level.width.toFloat() / level.height) // Maintain aspect ratio of the level
     ) {
-        val size = IntSize(this.size.width.toInt(), this.size.height.toInt())
-        val width = size.width.toFloat() / level.width
-        val height = size.height.toFloat() / level.height
-
-        val scaleFactor = if (size.width > size.height) {
-            height / bmp[0]?.height?.toFloat()!!
-        } else {
-            minOf(width, height) / bmp[0]?.width?.toFloat()!!
-        }
+        val cellWidth = size.width / level.width
+        val cellHeight = size.height / level.height
 
         for (y in 0 until level.height) {
             for (x in 0 until level.width) {
@@ -64,13 +58,10 @@ fun LevelPreview(
                 if (currentObject in bmp.indices) {
                     bmp[currentObject]?.let { bitmap ->
                         drawIntoCanvas { canvas ->
-                            val dstOffset = Offset(x * width, y * height)
-                            val dstSize = Size(width, height)
-
-                            // Scale the bitmap using the scaleFactor
+                            val dstOffset = Offset(x * cellWidth, y * cellHeight)
                             val scaledBitmap = bitmap.asAndroidBitmap().scale(
-                                (bitmap.width * scaleFactor).toInt(),
-                                (bitmap.height * scaleFactor).toInt(),
+                                cellWidth.toInt(),
+                                cellHeight.toInt(),
                                 true
                             ).asImageBitmap()
 

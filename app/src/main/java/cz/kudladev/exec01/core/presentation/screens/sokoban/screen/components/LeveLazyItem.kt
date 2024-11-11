@@ -3,10 +3,12 @@ package cz.kudladev.exec01.core.presentation.screens.sokoban.screen.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,8 +39,13 @@ fun LevelLazyItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             LevelPreview(
-                level = level
+                level = level,
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .width(80.dp) // Fixed width
+                    .aspectRatio(level.width.toFloat() / level.height) // Maintain aspect ratio
             )
+
             Column(
                 modifier = Modifier.padding(start = 16.dp)
             ) {

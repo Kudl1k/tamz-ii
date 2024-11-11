@@ -14,4 +14,8 @@ sealed class SokobanEvent {
     data object DecreaseHeight: SokobanEvent()
     data object IncreaseHeight: SokobanEvent()
 
+    data class UpdateEditLevel(val level: IntArray) : SokobanEvent()
+
+    data object SaveNewLevel : SokobanEvent()
+
 }
