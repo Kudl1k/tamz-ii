@@ -63,6 +63,16 @@ fun LevelLazyItem(
                         text = "Current moves: ${level.currentMoves}",
                         fontSize = 12.sp
                     )
+                } else if (level.completed){
+                    Text(
+                        text = "Completed",
+                        color = Color.Green,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = "Moves: ${level.currentMoves}",
+                        fontSize = 12.sp
+                    )
                 }
             }
 

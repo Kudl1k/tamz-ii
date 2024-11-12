@@ -10,6 +10,7 @@ data class Level(
     val height: Int,
     val currentMoves: Int,
     val bestMoves: Int,
+    val completed: Boolean,
     val inProgress: Boolean
 ) {
     override fun equals(other: Any?): Boolean {

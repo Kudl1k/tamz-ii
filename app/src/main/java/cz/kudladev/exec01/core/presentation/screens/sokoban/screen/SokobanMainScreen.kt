@@ -1,6 +1,9 @@
 package cz.kudladev.exec01.core.presentation.screens.sokoban.screen
 
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,9 +17,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +30,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +47,7 @@ import cz.kudladev.exec01.core.presentation.components.NavDrawer
 import cz.kudladev.exec01.core.presentation.components.TopAppBarWithDrawer
 import cz.kudladev.exec01.core.presentation.screens.sokoban.SokobanEvent
 import cz.kudladev.exec01.core.presentation.screens.sokoban.SokobanState
+import cz.kudladev.exec01.core.presentation.screens.sokoban.domain.loadLevelsFromFile
 import cz.kudladev.exec01.core.presentation.screens.sokoban.screen.components.LevelLazyItem
 import cz.kudladev.exec01.core.presentation.screens.sokoban.screen.components.LevelPreview
 import kotlinx.coroutines.launch
@@ -52,6 +63,25 @@ fun SokobanMainScreen(
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    var dropdownMenu by remember { mutableStateOf(false) }
+
+    var fileURI by remember { mutableStateOf("") }
+
+    val pickFileTxtLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { fileUri ->
+        if (fileUri != null) {
+            fileURI = fileUri.toString()
+            Log.d("SokobanMainScreen", "File URI: $fileURI")
+            val levels = loadLevelsFromFile(context, fileUri)
+            Log.d("SokobanMainScreen", "Levels: $levels")
+            onEvent(SokobanEvent.LoadLevels(levels))
+        } else {
+            Log.d("SokobanMainScreen", "File URI is null")
+        }
+    }
+
 
     NavDrawer(
         navController = navController,
@@ -69,6 +99,36 @@ fun SokobanMainScreen(
                             }
                         }
                     },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                dropdownMenu = !dropdownMenu
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = null
+                            )
+                        }
+                        if (dropdownMenu) {
+                            DropdownMenu(
+                                onDismissRequest = {
+                                    dropdownMenu = false
+                                },
+                                expanded = dropdownMenu
+                            ) {
+                                DropdownMenuItem(
+                                    onClick = {
+                                        pickFileTxtLauncher.launch("text/*")
+                                        dropdownMenu = false
+                                    },
+                                    text = {
+                                        Text("Upload a new levels")
+                                    }
+                                )
+                            }
+                        }
+                    }
                 )
             }
         ) {
@@ -85,7 +145,7 @@ fun SokobanMainScreen(
                 )
                 if (state.levels.isEmpty()) {
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -106,8 +166,6 @@ fun SokobanMainScreen(
                             }
                         }
                     }
-
-
                 }
                 Button(
                     modifier = Modifier.padding(vertical = 10.dp),

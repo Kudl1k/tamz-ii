@@ -14,6 +14,7 @@ data class LevelDTO(
     @ColumnInfo(name = "height") val height: Int,
     @ColumnInfo(name = "current_moves") val currentMoves: Int,
     @ColumnInfo(name = "best_moves") val bestMoves: Int,
+    @ColumnInfo(name = "completed") val completed: Boolean,
     @ColumnInfo(name = "in_progress") val inProgress: Boolean
 ) {
     override fun equals(other: Any?): Boolean {
@@ -30,6 +31,7 @@ data class LevelDTO(
         if (height != other.height) return false
         if (currentMoves != other.currentMoves) return false
         if (bestMoves != other.bestMoves) return false
+        if (completed != other.completed) return false
         if (inProgress != other.inProgress) return false
 
         return true
@@ -44,6 +46,7 @@ data class LevelDTO(
         result = 31 * result + height
         result = 31 * result + currentMoves
         result = 31 * result + bestMoves
+        result = 31 * result + completed.hashCode()
         result = 31 * result + inProgress.hashCode()
         return result
     }

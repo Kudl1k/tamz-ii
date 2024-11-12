@@ -12,14 +12,14 @@ import kotlinx.coroutines.launch
 
 class Game(private val level: Level) {
 
-    var levelWidth: Int = 10
-    var levelHeight: Int = 10
+    var levelWidth: Int = level.width
+    var levelHeight: Int = level.height
     val currentLevel = mutableStateOf(level.level)
     var currentMoves = mutableStateOf(level.currentMoves)
     val baseLevel = level.baseLevel
     var points = mutableStateOf(0)
     var maxPoints = mutableStateOf(0)
-    var player: Player? = null
+    var player: Player = Player(0, 0)
     var win = mutableStateOf(false)
 
     init {
@@ -37,8 +37,8 @@ class Game(private val level: Level) {
         var y = 0
         for (i in level.indices) {
             if (level[i] == 4) {
-                x = i % 10
-                y = i / 10
+                x = i % levelWidth
+                y = i / levelWidth
                 break
             }
         }
@@ -172,7 +172,7 @@ class Game(private val level: Level) {
         player!!.y = nextY
     }
 
-    private fun checkWin(): Boolean {
+    fun checkWin(): Boolean {
         for (i in currentLevel.value.indices) {
             if (currentLevel.value[i] == 3) {
                 return false
@@ -194,7 +194,7 @@ class Game(private val level: Level) {
     private fun getMaxPoints(): Int {
         var points = 0
         for (i in baseLevel.indices) {
-            if (baseLevel[i] == 3) {
+            if (baseLevel[i] == 3 || baseLevel[i] == 5) {
                 points++
             }
         }

@@ -14,7 +14,8 @@ fun Level.toLevelDTO(): LevelDTO {
         height = height,
         currentMoves = currentMoves,
         bestMoves = bestMoves,
-        inProgress = inProgress
+        inProgress = inProgress,
+        completed = completed
     )
 }
 
@@ -28,7 +29,8 @@ fun LevelDTO.toLevel(): Level {
         height = height,
         currentMoves = currentMoves,
         bestMoves = bestMoves,
-        inProgress = inProgress
+        inProgress = inProgress,
+        completed = completed
     )
 }
 

@@ -1,5 +1,7 @@
 package cz.kudladev.exec01.core.presentation.screens.sokoban
 
+import cz.kudladev.exec01.core.presentation.screens.sokoban.data.LevelLoader
+
 sealed class SokobanEvent {
 
     data class SelectLevel(val level: Int) : SokobanEvent()
@@ -17,5 +19,7 @@ sealed class SokobanEvent {
     data class UpdateEditLevel(val level: IntArray) : SokobanEvent()
 
     data object SaveNewLevel : SokobanEvent()
+
+    data class LoadLevels(val levels: List<LevelLoader>) : SokobanEvent()
 
 }

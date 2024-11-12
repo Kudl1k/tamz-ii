@@ -67,7 +67,7 @@ class SokobanViewModel(
                 Log.d("SokobanViewModel", "Using levels from DB")
                 _state.value = _state.value.copy(
                     levels = dbLevels,
-                    selectedLevel = dbLevels[0],
+                    selectedLevel = if (dbLevels.isNotEmpty()) dbLevels[0] else Level(0, IntArray(0), IntArray(0), 0, 0, 0, 0, 0, false, false),
                 )
             }
         }
@@ -81,9 +81,11 @@ class SokobanViewModel(
                 )
             }
             is SokobanEvent.SelectLevel -> {
+                Log.d("SokobanViewModel", "Levels: ${state.value.levels}")
                 _state.value = _state.value.copy(
                     selectedLevel = state.value.levels[event.level-1],
                 )
+                Log.d("SokobanViewModel", "Selected level: ${state.value.selectedLevel}")
             }
 
             is SokobanEvent.SaveProgress -> {
@@ -97,6 +99,7 @@ class SokobanViewModel(
                     state.value.selectedLevel.width,
                     event.currentMoves,
                     state.value.selectedLevel.bestMoves,
+                    false,
                     event.currentMoves != 0
                 )
                 viewModelScope.launch {
@@ -112,7 +115,18 @@ class SokobanViewModel(
             }
             is SokobanEvent.Win -> {
                 viewModelScope.launch {
-                    val moves = event.currentMoves < state.value.selectedLevel.bestMoves
+                    val moves = if (event.currentMoves < state.value.selectedLevel.bestMoves) {
+                        Log.d("SokobanViewModel", "New best moves: ${event.currentMoves}")
+                        true
+                    } else {
+                        if (state.value.selectedLevel.bestMoves == 0) {
+                            Log.d("SokobanViewModel", "First win")
+                            true
+                        } else {
+                            Log.d("SokobanViewModel", "Best moves: ${state.value.selectedLevel.bestMoves}")
+                            false
+                        }
+                    }
                     Log.d("SokobanViewModel", "Moves: ${event.currentMoves}")
                     val updatedLevel = Level(
                         state.value.selectedLevel.id,
@@ -123,6 +137,7 @@ class SokobanViewModel(
                         state.value.selectedLevel.width,
                         event.currentMoves,
                         if (moves) event.currentMoves else state.value.selectedLevel.bestMoves,
+                        true,
                         false
                     )
                     withContext(Dispatchers.IO) {
@@ -257,6 +272,7 @@ class SokobanViewModel(
                     state.value.editorLevel.value.width,
                     0,
                     0,
+                    false,
                     false
                 )
                 viewModelScope.launch {
@@ -267,6 +283,35 @@ class SokobanViewModel(
                         levels = state.value.levels + newLevel
                     )
                 }
+            }
+
+            is SokobanEvent.LoadLevels -> {
+                Log.d("SokobanViewModel", "Loading levels")
+                val allLevels = state.value.levels.toMutableList() // Create a mutable copy
+                event.levels.forEach {
+                    val level = Level(
+                        allLevels.size + 1,
+                        it.level,
+                        it.level,
+                        it.boxes,
+                        it.width,
+                        it.height,
+                        0,
+                        0,
+                        false,
+                        false
+                    )
+                    viewModelScope.launch {
+                        withContext(Dispatchers.IO) {
+                            levelDao.insertLevel(level.toLevelDTO())
+                        }
+                    }
+                    allLevels.add(level) // Add the new level to the mutable list
+                }
+                Log.d("SokobanViewModel", "All levels: $allLevels")
+                _state.value = _state.value.copy(
+                    levels = allLevels
+                )
             }
         }
     }

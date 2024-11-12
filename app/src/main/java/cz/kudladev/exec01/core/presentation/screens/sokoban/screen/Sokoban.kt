@@ -104,6 +104,13 @@ fun SokoView(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (state.selectedLevel.completed) {
+            Log.d("SokobanView", "Level completed")
+            game.value.win.value = game.value.checkWin()
+        }
+    }
+
 
 
     NavDrawer(
@@ -188,6 +195,10 @@ fun SokoView(
                 ) {
                     Text(
                         text = "Points: ${game.value.points.value}/${game.value.maxPoints.value}",
+                        modifier = Modifier.wrapContentSize()
+                    )
+                    Text(
+                        text = "Moves: ${game.value.currentMoves.value}",
                         modifier = Modifier.wrapContentSize()
                     )
                     Button(
