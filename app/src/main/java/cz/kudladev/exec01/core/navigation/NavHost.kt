@@ -6,14 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.navigation
 import cz.kudladev.exec01.core.presentation.screens.HomeScreen
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalcHistory
-import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreen
+import cz.kudladev.exec01.core.presentation.screens.weather.screens.WeatherScreen
 import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculator

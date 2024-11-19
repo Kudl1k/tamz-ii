@@ -1,4 +1,4 @@
-package cz.kudladev.exec01.core.presentation.screens.weather
+package cz.kudladev.exec01.core.presentation.screens.weather.screens.components
 
 import cz.kudladev.exec01.R
 

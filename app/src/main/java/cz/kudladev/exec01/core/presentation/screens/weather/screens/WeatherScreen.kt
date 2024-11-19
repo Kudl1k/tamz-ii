@@ -1,7 +1,8 @@
-package cz.kudladev.exec01.core.presentation.screens.weather
+package cz.kudladev.exec01.core.presentation.screens.weather.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,7 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +37,7 @@ import androidx.compose.material.icons.filled.LocationOff
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,6 +66,12 @@ import cz.kudladev.exec01.core.presentation.components.TopAppBarWithDrawer
 import kotlinx.coroutines.launch
 import cz.kudladev.exec01.R
 import cz.kudladev.exec01.core.navigation.Routes
+import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenEvents
+import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenState
+import cz.kudladev.exec01.core.presentation.screens.weather.screens.components.getIcon
+import cz.kudladev.exec01.core.presentation.screens.weather.screens.components.DropDownSearchItem
+import cz.kudladev.exec01.core.presentation.screens.weather.screens.components.SearchBox
+import cz.kudladev.exec01.core.presentation.screens.weather.screens.components.WeatherLineChart
 
 @Composable
 fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, state: WeatherScreenState, onEvent: (WeatherScreenEvents) -> Unit) {
@@ -230,10 +239,10 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                 .verticalScroll(rememberScrollState()),
                         ) {
                             Box(
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.fillMaxWidth().aspectRatio(1f)
                             ){
                                 Box(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().aspectRatio(1f),
                                     contentAlignment = Alignment.Center
                                 ){
                                     Image(
@@ -255,13 +264,13 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                             }
                             Card(
                                 modifier = Modifier
-                                    .weight(1f)
+                                    .fillMaxSize()
                                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                             ) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 48.dp, start = 24.dp, bottom = 24.dp)
+                                        .padding(top = 24.dp, start = 24.dp, bottom = 24.dp)
                                 ) {
                                     Text(
                                         text = "Právě teď",
@@ -414,6 +423,106 @@ fun WeatherScreen(modifier: Modifier = Modifier, navController: NavController, s
                                             }
                                         }
                                     }
+                                }
+                                Column(
+                                    modifier = Modifier.fillMaxSize().padding(24.dp)
+                                ) {
+                                    Text(
+                                        text = "Předpověď na 24 hodin",
+                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                    )
+                                    val data = state.weather?.hourly?.temperature_2m?.mapIndexed { index, temperature ->
+                                        Pair(index.toFloat(), temperature)
+                                    }?.filterIndexed { index, _ ->
+                                        state.weather?.hourly?.time?.getOrNull(index)?.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:00".toRegex()) ?: false
+                                    } ?: emptyList()
+
+                                    val time = state.weather?.hourly?.time?.filter {
+                                        it.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:00".toRegex())
+                                    }?.map {
+                                        it.split("T").last().split(":").first()
+                                    } ?: emptyList()
+
+                                    WeatherLineChart(
+                                        modifier = Modifier.fillMaxSize(),
+                                        data = data.subList(0, 24),
+                                        time = time.subList(0, 24)
+                                    )
+
+                                }
+                                Column(
+                                    modifier = Modifier.fillMaxSize().padding(24.dp)
+                                ) {
+                                    Text(
+                                        text = "Předpověď na 5 dní",
+                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                    )
+                                    Log.d("WeatherScreen", "Daily: ${state.weather?.daily}")
+                                    val date = state.weather?.daily?.time?.map {
+                                        it.split("T").first()
+                                    } ?: emptyList()
+                                    val max_temp = state.weather?.daily?.temperature_2m_max?.map {
+                                        it.toInt()
+                                    } ?: emptyList()
+                                    val min_temp = state.weather?.daily?.temperature_2m_min?.map {
+                                        it.toInt()
+                                    } ?: emptyList()
+                                    val weather_code = state.weather?.daily?.weather_code?.map {
+                                        it
+                                    } ?: emptyList()
+
+
+                                    LazyRow(
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        items(5) { index ->
+                                            Card(
+                                                modifier = Modifier
+                                                    .padding(8.dp)
+                                                    .width(200.dp)
+                                                    .clip(RoundedCornerShape(16.dp)),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = MaterialTheme.colorScheme.surface,
+                                                )
+                                            ) {
+                                                Column(
+                                                    modifier = Modifier.fillMaxSize().padding(8.dp)
+                                                ) {
+                                                    Text(
+                                                        text = date[index],
+                                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                                        modifier = Modifier.padding(8.dp)
+                                                    )
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize().aspectRatio(1f)
+                                                    ){
+                                                        Box(
+                                                            modifier = Modifier.fillMaxSize().aspectRatio(1f),
+                                                            contentAlignment = Alignment.Center
+                                                        ){
+                                                            Image(
+                                                                painter = painterResource(id = getIcon(weather_code[index])),
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(128.dp)
+                                                            )
+                                                        }
+                                                        Box(
+                                                            modifier = Modifier.fillMaxSize(),
+                                                            contentAlignment = Alignment.BottomStart
+                                                        ){
+                                                            Text(
+                                                                text = "${max_temp[index]}° / ${min_temp[index]}°",
+                                                                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                                                fontWeight = FontWeight.ExtraBold
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+
                                 }
                             }
                         }

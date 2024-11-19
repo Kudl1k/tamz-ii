@@ -1,6 +1,5 @@
-package cz.kudladev.exec01.core.presentation.screens.weather
+package cz.kudladev.exec01.core.presentation.screens.weather.screens.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
