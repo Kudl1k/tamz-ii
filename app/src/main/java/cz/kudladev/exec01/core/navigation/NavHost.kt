@@ -21,6 +21,7 @@ import cz.kudladev.exec01.core.presentation.screens.sokoban.SokoView
 import cz.kudladev.exec01.core.presentation.screens.sokoban.SokobanViewModel
 import cz.kudladev.exec01.core.presentation.screens.sokoban.screen.LevelEditor
 import cz.kudladev.exec01.core.presentation.screens.sokoban.screen.SokobanMainScreen
+import cz.kudladev.exec01.core.presentation.screens.weather.screens.WeatherScreenHandleRotate
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -92,7 +93,11 @@ fun NavigationHost(
                 val viewModel: WeatherScreenViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
                 val onEvent = viewModel::onEvent
-                WeatherScreen(navController = navHostController, state = state, onEvent = onEvent)
+                WeatherScreenHandleRotate(
+                    navController = navHostController,
+                    state = state,
+                    onEvent = onEvent
+                )
             }
             navigation(
                 startDestination = Routes.SokobanMain.route,
