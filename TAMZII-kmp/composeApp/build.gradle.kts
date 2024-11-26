@@ -38,6 +38,8 @@ kotlin {
             implementation(libs.bundles.koin.android)
             implementation(libs.ktor.client.android)
 
+            implementation("com.google.android.gms:play-services-location:21.3.0")
+
         }
         commonMain.dependencies {
             implementation(compose.runtime)

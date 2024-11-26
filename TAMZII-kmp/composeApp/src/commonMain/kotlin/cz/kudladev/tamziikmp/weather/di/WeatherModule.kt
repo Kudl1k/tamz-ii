@@ -24,10 +24,7 @@ val weatherModule = module {
         WeatherUseCase(get())
     }
 
-    single<PermissionsService> {
-        PermissionsServiceImpl()
-    }
 
-    viewModel { WeatherScreenViewModel(get(),get()) }
+    viewModel { WeatherScreenViewModel(get()) }
 
 }

@@ -4,4 +4,6 @@ sealed class WeatherScreenEvent {
 
     object getWeather : WeatherScreenEvent()
 
+    object TogglePermissions : WeatherScreenEvent()
+
 }

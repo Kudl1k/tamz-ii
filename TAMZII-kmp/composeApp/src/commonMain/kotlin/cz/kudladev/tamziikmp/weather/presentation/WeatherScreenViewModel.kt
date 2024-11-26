@@ -3,6 +3,7 @@ package cz.kudladev.tamziikmp.weather.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.kudladev.tamziikmp.core.util.Resource
+import cz.kudladev.tamziikmp.permissions.getLocation
 import cz.kudladev.tamziikmp.permissions.model.Permission
 import cz.kudladev.tamziikmp.permissions.service.PermissionsService
 import cz.kudladev.tamziikmp.weather.domain.WeatherUseCase
@@ -14,16 +15,12 @@ import kotlinx.coroutines.launch
 
 class WeatherScreenViewModel(
     private val weatherUseCase: WeatherUseCase,
-    private val permissionService: PermissionsService
 ): ViewModel() {
     private val _state = MutableStateFlow(WeatherScreenState())
     val state = _state.asStateFlow()
 
 
     init {
-        viewModelScope.launch {
-            permissionService.providePermission(Permission.LOCATION_SERVICE_ON)
-        }
         getWeather(50.0833, 14.4167)
     }
 
@@ -32,6 +29,11 @@ class WeatherScreenViewModel(
         when(event) {
             WeatherScreenEvent.getWeather -> {
                 getWeather(50.0833, 14.4167)
+            }
+            WeatherScreenEvent.TogglePermissions -> {
+                _state.update { it.copy(
+                    permissionsGranted = true
+                ) }
             }
         }
     }
@@ -45,6 +47,8 @@ class WeatherScreenViewModel(
             _state.update {
                 it.copy(isLoading = true)
             }
+            val location = getLocation()
+            println("Location: $location")
             val result = weatherUseCase.execute(latitude, longitude)
             when(result) {
                 is Resource.Success -> {
