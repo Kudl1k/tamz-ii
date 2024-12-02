@@ -32,7 +32,7 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
         Routes.Scanner,
         Routes.Sokoban,
         Routes.Weather,
-        Routes.API,
+        Routes.FaceRecognition
     )
     Scaffold(
 

@@ -18,6 +18,7 @@ navigation-compose = "2.7.0-alpha07"
 koin = "4.0.0"
 chart = "Beta-0.0.5"
 ktor = "2.3.12"
+coil3 = "3.0.3"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -54,6 +55,11 @@ ktor-client-darwin = { group = "io.ktor" ,name = "ktor-client-darwin", version.r
 #Serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.3" }
 
+#Coil
+coil = { module = "io.coil-kt.coil3:coil", version.ref = "coil3"}
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil3" }
+coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coil3" }
+coil-http = { module = "io.coil-kt.coil3:coil-network-ktor2", version.ref = "coil3" }
 
 
 chart = { group = "io.github.thechance101", name = "chart", version.ref = "chart" }
@@ -81,4 +87,10 @@ ktor = [
     "ktor-client-core",
     "ktor-client-content-negotiation",
     "ktor-serialization-kotlinx-json"
+]
+coil = [
+    "coil",
+    "coil-compose",
+    "coil-compose-core",
+    "coil-http"
 ]

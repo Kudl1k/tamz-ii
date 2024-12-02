@@ -1,5 +1,6 @@
 package cz.kudladev.exec01.core.navigation
 
+import FaceRecognition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,6 +12,7 @@ import cz.kudladev.exec01.core.presentation.screens.HomeScreen
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreen
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
+import cz.kudladev.exec01.core.presentation.screens.face_recognition.FaceRecognitionViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalcHistory
 import cz.kudladev.exec01.core.presentation.screens.weather.screens.WeatherScreen
 import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenViewModel
@@ -125,8 +127,16 @@ fun NavigationHost(
                     )
                 }
             }
+            composable(route = Routes.FaceRecognition.route) {
+                val faceViewModel: FaceRecognitionViewModel = koinViewModel()
+                val state by faceViewModel.state.collectAsState()
+                val onEvent = faceViewModel::onEvent
+                FaceRecognition(
+                    navController = navHostController,
+                    state = state,
+                    onEvent = onEvent
+                )
+            }
         }
-
     }
-
 }

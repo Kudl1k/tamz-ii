@@ -103,5 +103,7 @@ dependencies {
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$room_version")
 
+    implementation("com.google.mlkit:face-detection:16.1.7")
 
+    implementation("io.coil-kt:coil-compose:2.1.0")
 }

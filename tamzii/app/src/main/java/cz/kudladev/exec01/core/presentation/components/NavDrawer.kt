@@ -29,7 +29,7 @@ fun NavDrawer(
         Routes.Scanner,
         Routes.Sokoban,
         Routes.Weather,
-        Routes.API
+        Routes.FaceRecognition
     )
 
     ModalNavigationDrawer(

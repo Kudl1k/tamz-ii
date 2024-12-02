@@ -57,6 +57,9 @@ kotlin {
             implementation(libs.bundles.koin)
             implementation(libs.bundles.ktor)
             implementation(libs.chart)
+            implementation(libs.bundles.coil)
+
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

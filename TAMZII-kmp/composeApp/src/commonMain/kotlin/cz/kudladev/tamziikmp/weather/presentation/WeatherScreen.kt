@@ -1,15 +1,18 @@
 package cz.kudladev.tamziikmp.weather.presentation
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import cz.kudladev.tamziikmp.permissions.RequestLocationPermission
+import cz.kudladev.tamziikmp.weather.presentation.components.WeatherDescriptionDisplay
+import cz.kudladev.tamziikmp.weather.presentation.components.WeatherMainDisplay
 
 @Composable
 fun WeatherScreen(
@@ -18,13 +21,27 @@ fun WeatherScreen(
 ) {
     RequestLocationPermission(onEvent)
 
+    LaunchedEffect(key1 = state.permissionsGranted){
+        if (state.permissionsGranted){
+            onEvent(WeatherScreenEvent.getWeather)
+        }
+    }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Weather Screen")
-        Text(text = "Weather: ${state.weather}")
+    println(state.weather)
+
+    Scaffold {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .systemBarsPadding(),
+        ){
+            Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            ) {
+                WeatherMainDisplay(state = state)
+                WeatherDescriptionDisplay(state = state, modifier = Modifier.weight(1f))
+            }
+        }
     }
 }

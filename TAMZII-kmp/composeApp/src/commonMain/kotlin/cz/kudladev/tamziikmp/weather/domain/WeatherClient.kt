@@ -1,11 +1,11 @@
 package cz.kudladev.tamziikmp.weather.domain
 
-import cz.kudladev.tamziikmp.weather.data.dto.WeatherResponse
+import cz.kudladev.tamziikmp.weather.data.dto.current.WeatherCurrentResponse
 
 interface WeatherClient {
 
-    suspend fun getWeather(
+    suspend fun getCurrentWeather(
         latitude: Double,
         longitude: Double
-    ): WeatherResponse
+    ): WeatherCurrentResponse
 }

@@ -1,6 +1,6 @@
 package cz.kudladev.tamziikmp.weather.presentation
 
-import cz.kudladev.tamziikmp.weather.data.dto.WeatherResponse
+import cz.kudladev.tamziikmp.weather.data.dto.current.WeatherCurrentResponse
 import cz.kudladev.tamziikmp.weather.network.NetworkError
 
 data class WeatherScreenState(
@@ -9,7 +9,7 @@ data class WeatherScreenState(
     val error: NetworkError? = null,
     val longitude: Double? = null,
     val latitude: Double? = null,
-    val weather: WeatherResponse? = null,
+    val weather: WeatherCurrentResponse? = null,
 //    val currentWeather: CurrentWeather? = null,
 //    val place: GeocodeReverseResponse? = null,
     val searchQuery: String = "",

@@ -10,6 +10,7 @@ import cz.kudladev.exec01.core.data.api.LevelsAPI
 import cz.kudladev.exec01.core.data.api.StoreApi
 import cz.kudladev.exec01.core.data.api.WeatherApi
 import cz.kudladev.exec01.core.presentation.screens.api_screen.APIScreenViewModel
+import cz.kudladev.exec01.core.presentation.screens.face_recognition.FaceRecognitionViewModel
 import cz.kudladev.exec01.core.presentation.screens.weather.WeatherScreenViewModel
 import cz.kudladev.exec01.core.presentation.screens.investment_calculator.InvestmentCalculatorViewModel
 import cz.kudladev.exec01.core.presentation.screens.scanner_screen.ScannerScreenViewModel
@@ -112,6 +113,10 @@ val coreModule = module {
             levelsAPI = get(),
             levelDao = get()
         )
+    }
+
+    viewModel{
+        FaceRecognitionViewModel()
     }
 
 

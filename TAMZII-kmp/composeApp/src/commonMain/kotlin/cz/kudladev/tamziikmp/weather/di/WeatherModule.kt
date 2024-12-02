@@ -1,11 +1,9 @@
 package cz.kudladev.tamziikmp.weather.di
 
 import cz.kudladev.tamziikmp.core.remote.HttpClientFactory
-import cz.kudladev.tamziikmp.permissions.service.PermissionsService
-import cz.kudladev.tamziikmp.permissions.service.PermissionsServiceImpl
 import cz.kudladev.tamziikmp.weather.data.KtorWeatherClient
 import cz.kudladev.tamziikmp.weather.domain.WeatherClient
-import cz.kudladev.tamziikmp.weather.domain.WeatherUseCase
+import cz.kudladev.tamziikmp.weather.domain.usecase.CurrentWeather
 import cz.kudladev.tamziikmp.weather.presentation.WeatherScreenViewModel
 import io.ktor.client.HttpClient
 import org.koin.core.module.dsl.viewModel
@@ -20,8 +18,8 @@ val weatherModule = module {
         KtorWeatherClient(get())
     }
 
-    single<WeatherUseCase> {
-        WeatherUseCase(get())
+    single<CurrentWeather> {
+        CurrentWeather(get())
     }
 
 

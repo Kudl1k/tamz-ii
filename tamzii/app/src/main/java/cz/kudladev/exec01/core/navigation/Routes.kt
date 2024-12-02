@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Gamepad
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
@@ -29,5 +30,8 @@ sealed class Routes(val route: String, val title: String? = null, val icon: Imag
     data object SokobanMain : Routes(route = "sokoban_main", title = "Level select", icon = Icons.Default.Gamepad)
     data object SokobanGame : Routes(route = "sokoban_game", title = "Game", icon = Icons.Default.Gamepad)
     data object SokobanEdit : Routes(route = "sokoban_edit", title = "Editor", icon = Icons.Default.Edit)
+
+    data object FaceRecognition : Routes(route = "face_recognition", title = "Rozpoznání obličeje", icon = Icons.Default.Face)
+
 
 }
